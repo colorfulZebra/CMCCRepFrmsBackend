@@ -1,0 +1,27 @@
+{
+  "name": "CMCCRepFrmsBackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colorfulZebra/CMCCRepFrmsBackend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/colorfulZebra/CMCCRepFrmsBackend/issues"
+  },
+  "homepage": "https://github.com/colorfulZebra/CMCCRepFrmsBackend#readme",
+  "dependencies": {
+    "mongoose": "^5.2.9",
+    "xlsx": "^0.13.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0"
+  }
+}
