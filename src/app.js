@@ -12,6 +12,8 @@ app.get('/', function (req, res) {
   res.send('Hello world');
 });
 
+app.use('/api/user', require('./api/user'));
+
 let server = app.listen(config.port, function () {
 
   let serverPort = server.address().port;

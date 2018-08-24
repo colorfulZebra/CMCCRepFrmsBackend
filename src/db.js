@@ -1,8 +1,9 @@
 'use strict';
 const mongoose = require('mongoose');
-const DB_URL = 'mongodb://localhost:27017/test';
+const config = require('./config');
+const DB_URL = `mongodb://${config.dbhost}:${config.dbport}/${config.dbname}`;
 
-mongoose.connect(DB_URL);
+mongoose.connect(DB_URL, { useNewUrlParser: true });
 
 mongoose.connection.on('connected', function() {
   console.log('Mongoose connection open to ' + DB_URL);
