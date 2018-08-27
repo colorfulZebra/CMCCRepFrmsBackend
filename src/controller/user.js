@@ -13,7 +13,7 @@ module.exports = {
       if (newUser.name && newUser.password && typeof newUser.name === 'string' && typeof newUser.password === 'string') {
         this.findByName(newUser.name).then((userGet) => {
           if (userGet) {    // 如果用户已经存在则报错
-            reject(`${scriptPath}: insert() 用户${newUser.name}已存在`);
+            reject(`${scriptPath}: insert() 用户'${newUser.name}'已存在`);
           } else {
             let newRecord = new User({
               name: newUser.name,
@@ -31,7 +31,7 @@ module.exports = {
           reject(err);
         });
       } else {
-        reject('controller/user.js: insert() 用户名或密码非法');
+        reject('controller/user.js: insert(newUser) 用户名或密码非法');
       }
     });
   },
@@ -51,7 +51,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: findByName() 非法用户名`);
+        reject(`${scriptPath}: findByName(name) 非法用户名`);
       }
     });
   },
@@ -71,7 +71,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: checkIn() 用户名或密码非法`);
+        reject(`${scriptPath}: checkIn(userInfo) 用户名或密码非法`);
       }
     });
   }

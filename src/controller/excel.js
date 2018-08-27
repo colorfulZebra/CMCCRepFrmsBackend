@@ -31,7 +31,7 @@ module.exports = {
             content: sheetJson
           });
         }
-        Excel.remove({month: monthID, excel: excelPath.split(path.sep).slice(-1)[0]}, (err) => {
+        Excel.deleteMany({month: monthID, excel: excelPath.split(path.sep).slice(-1)[0]}, (err) => {
           if (err) {
             reject(err);
           } else {
@@ -55,7 +55,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: recordExcel() 参数不合法`);
+        reject(`${scriptPath}: recordExcel(excelPath, monthID) 参数不合法`);
       }
     });
   },
@@ -88,7 +88,7 @@ module.exports = {
             }
           }
         }
-        Excel.remove({month: monthID}, (err) => {
+        Excel.deleteMany({month: monthID}, (err) => {
           if (err) {
             reject(err);
           } else {
@@ -112,7 +112,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: recordExcelOfFolder() 参数不合法`);
+        reject(`${scriptPath}: recordExcelOfFolder(folderPath, monthID) 参数不合法`);
       }
     });
   }
