@@ -13,6 +13,7 @@ app.get('/', function (req, res) {
 });
 
 app.use('/api/user', require('./api/user'));
+app.use('/api/excel', require('./api/excel'));
 
 let server = app.listen(config.port, function () {
 

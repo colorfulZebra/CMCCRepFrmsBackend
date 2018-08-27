@@ -9,7 +9,10 @@ router.get('/query/:name', function(req, res) {
     res.send({ result: true, data: userGet });
   }).catch((err) => {
     console.log(err);
-    res.send({ result: false });
+    res.send({
+      result: false,
+      data: err
+    });
   });
 });
 
@@ -24,7 +27,10 @@ router.post('/login', function(req, res) {
     }
   }).catch((err) => {
     console.log(err);
-    res.send({ result: false });
+    res.send({
+      result: false,
+      data: err
+    });
   });
 });
 
@@ -35,7 +41,10 @@ router.post('/new', function(req, res) {
     res.send({ result: true, data: userRes });
   }).catch((err) => {
     console.log(err);
-    res.send({ result: false });
+    res.send({
+      result: false,
+      data: err
+    });
   });
 });
 

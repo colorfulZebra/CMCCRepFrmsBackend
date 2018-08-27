@@ -4,6 +4,10 @@ let User = require('../model/user');
 const scriptPath = 'controller/user.js';
 
 module.exports = {
+  /**
+   * add new user
+   * @param {Object} newUser
+   */
   insert: function(newUser) {
     return new Promise((resolve, reject) => {
       if (newUser.name && newUser.password && typeof newUser.name === 'string' && typeof newUser.password === 'string') {
@@ -15,7 +19,7 @@ module.exports = {
               name: newUser.name,
               password: md5(newUser.password)
             });
-            newRecord.save( (err, res) => {
+            newRecord.save((err, res) => {
               if (err) {
                 reject(err);
               } else {
@@ -32,6 +36,10 @@ module.exports = {
     });
   },
 
+  /**
+   * query user in database by name
+   * @param {String} name
+   */
   findByName: function(name) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string') {
@@ -48,6 +56,10 @@ module.exports = {
     });
   },
 
+  /**
+   * check username and password then authentication
+   * @param {Object} userInfo
+   */
   checkIn: function(userInfo) {
     return new Promise((resolve, reject) => {
       if (userInfo.name && userInfo.password && typeof userInfo.name === 'string' && typeof userInfo.password === 'string') {
