@@ -24,7 +24,7 @@
     "express": "^4.16.3",
     "md5": "^2.2.1",
     "moment": "^2.22.2",
-    "mongoose": "^5.2.9",
+    "mongoose": "^5.2.10",
     "xlsx": "^0.13.4"
   },
   "devDependencies": {

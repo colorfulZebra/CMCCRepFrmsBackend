@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 const config = require('./config');
 const DB_URL = `mongodb://${config.dbhost}:${config.dbport}/${config.dbname}`;
 
-mongoose.connect(DB_URL, { useNewUrlParser: true });
+mongoose.connect(DB_URL, {
+  useNewUrlParser: true
+});
+mongoose.set('useCreateIndex', true);
 
 mongoose.connection.on('connected', function() {
   console.log('Mongoose connection open to ' + DB_URL);

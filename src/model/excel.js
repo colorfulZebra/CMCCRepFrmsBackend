@@ -8,5 +8,6 @@ let excelSchema = new Schema({
   sheet: String,
   content: [ [String] ]
 });
+excelSchema.index({ month: 1, excel: 1, sheet: 1 }, { unique: true });
 
 module.exports = mongoose.model('Excel', excelSchema);

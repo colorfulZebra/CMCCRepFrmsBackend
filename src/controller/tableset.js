@@ -11,7 +11,7 @@ module.exports = {
   findTablesByUser: function(username) {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string') {
-        TableSet.find({owner: username}, (err, docs) => {
+        TableSet.find({ owner: username }, (err, docs) => {
           if (err) {
             reject(err);
           } else {
@@ -32,26 +32,15 @@ module.exports = {
   newSet: function(username, setname) {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string' && typeof setname === 'string') {
-        TableSet.findOne({ owner: username, name: setname }, (err, doc) => {
+        new TableSet({
+          owner: username,
+          name: setname,
+          tables: []
+        }).save((err, doc) => {
           if (err) {
             reject(err);
           } else {
-            if (doc) {
-              reject(`${scriptPath}: newSet(username, setname) 集合'${setname}'已经存在`);
-            } else {
-              let newRecord = new TableSet({
-                owner: username,
-                name: setname,
-                tables: []
-              });
-              newRecord.save((err, doc) => {
-                if (err) {
-                  reject(err);
-                } else {
-                  resolve(doc);
-                }
-              });
-            }
+            resolve(doc);
           }
         });
       } else {
@@ -73,7 +62,7 @@ module.exports = {
             reject(err);
           } else {
             if (doc.tables.length) {
-              reject(`${scriptPath}: deleteSet(username, setname) 集合'${setname}'非空`);
+              reject(`${scriptPath}: deleteSet(username, setname) 集合'${setname}@${username}'非空`);
             } else {
               TableSet.deleteOne({ owner: username, name: setname }, (err) => {
                 if (err) {
@@ -92,6 +81,28 @@ module.exports = {
   },
 
   /**
+   * Rename table set
+   * @param {String} username
+   * @param {String} setname
+   * @param {String} newname
+   */
+  renameSet: function(username, setname, newname) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof newname === 'string' && setname !== newname) {
+        TableSet.findOneAndUpdate({ owner: username, name: setname }, { $set: { name: newname } }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(doc);
+          }
+        });
+      } else {
+        reject(`${scriptPath}: renameSet(username, setname, newname) 参数非法`);
+      }
+    });
+  },
+
+  /**
    * Add new table
    * @param {String} username
    * @param {String} setname
@@ -100,24 +111,50 @@ module.exports = {
   newTable: function(username, setname, tableDef) {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string' && typeof setname === 'string' &&
-          tableDef.name && tableDef.columns && tableDef.rows && tableDef.observer &&
+          tableDef && tableDef.name && tableDef.columns && tableDef.rows &&
           typeof tableDef.name === 'string' &&
-          Array.isArray(tableDef.columns) &&
-          Array.isArray(tableDef.rows) &&
-          Array.isArray(tableDef.observer)) {
+          Array.isArray(tableDef.columns) && tableDef.columns.length > 0 &&
+          Array.isArray(tableDef.rows) && tableDef.rows.length > 0) {
 
-        TableSet.find({ owner: username, name: setname }, (err, doc) => {
-          if (err) {
-            reject(err);
+        TableSet.findOne({ owner: username, name: setname }).exec().then((doc) => { //首先检查是否有重复表
+          if (doc) {
+            let flag = false;
+            doc.tables.map((t) => {
+              if (t.name === tableDef.name) flag = true;
+            });
+            if (flag) {
+              reject(`${scriptPath}: newTable(username, setname, tableDef) 表'${setname}/${tableDef.name}@${username}'已存在`);
+            } else {
+              TableSet.findOneAndUpdate({
+                owner: username, name: setname
+              }, {
+                $push: {
+                  tables: {
+                    name: tableDef.name,
+                    columns: tableDef.columns,
+                    rows: tableDef.rows,
+                    observer: []
+                  }
+                } 
+              },(err, doc) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(doc);
+                }
+              });
+            }
           } else {
-            doc.tables.push(tableDef);
-            resolve(doc);
+            reject(`${scriptPath}: newTable(username, setname, tableDef) 表集合'${setname}@${username}'不存在`);
           }
+        }).catch((err) => {
+          reject(err);
         });
       } else {
         reject(`${scriptPath}: newTable(username, setname, tableDef) 参数非法`);
       }
     });
-  }
+  },
+
 
 };

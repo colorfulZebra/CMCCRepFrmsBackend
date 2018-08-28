@@ -11,24 +11,15 @@ module.exports = {
   insert: function(newUser) {
     return new Promise((resolve, reject) => {
       if (newUser.name && newUser.password && typeof newUser.name === 'string' && typeof newUser.password === 'string') {
-        this.findByName(newUser.name).then((userGet) => {
-          if (userGet) {    // 如果用户已经存在则报错
-            reject(`${scriptPath}: insert() 用户'${newUser.name}'已存在`);
+        new User({
+          name: newUser.name,
+          password: md5(newUser.password)
+        }).save((err, doc) => {
+          if (err) {
+            reject(err);
           } else {
-            let newRecord = new User({
-              name: newUser.name,
-              password: md5(newUser.password)
-            });
-            newRecord.save((err, res) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(res);
-              }
-            });
+            resolve(doc);
           }
-        }).catch((err) => {
-          reject(err);
         });
       } else {
         reject('controller/user.js: insert(newUser) 用户名或密码非法');

@@ -31,7 +31,7 @@ module.exports = {
             content: sheetJson
           });
         }
-        Excel.deleteMany({month: monthID, excel: excelPath.split(path.sep).slice(-1)[0]}, (err) => {
+        Excel.deleteMany({ month: monthID, excel: excelPath.split(path.sep).slice(-1)[0] }, (err) => {
           if (err) {
             reject(err);
           } else {
@@ -88,7 +88,7 @@ module.exports = {
             }
           }
         }
-        Excel.deleteMany({month: monthID}, (err) => {
+        Excel.deleteMany({ month: monthID }, (err) => {
           if (err) {
             reject(err);
           } else {
