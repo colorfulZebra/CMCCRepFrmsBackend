@@ -156,5 +156,74 @@ module.exports = {
     });
   },
 
+  /**
+   * Delete table by tablename
+   * @param {String} username
+   * @param {String} setname
+   * @param {String} tablename
+   */
+  deleteTable: function(username, setname, tablename) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string') {
+        TableSet.findOneAndUpdate({ owner: username, name: setname }, { $pull: { tables: { name: tablename } } }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(doc);
+          }
+        });
+      } else {
+        reject(`${scriptPath}: deleteTable(username, setname, tablename) 参数非法`);
+      }
+    });
+  },
+
+  /**
+   * Rename table
+   * @param {String} username
+   * @param {String} setname
+   * @param {String} tablename
+   * @param {String} newname
+   */
+  renameTable: function(username, setname, tablename, newname) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string' && typeof newname === 'string') {
+        TableSet.findOne({ owner: username, name: setname }).exec().then((doc) => {
+          if (doc) {
+            let flag = false;
+            let ftable = {};
+            doc.tables.map((t) => {
+              if (t.name === newname) flag = true;
+              if (t.name === tablename) ftable = t;
+            });
+            if (ftable.name === undefined) {
+              reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表'${setname}/${tablename}@${username}'不存在`);
+            } else if (flag) {
+              reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表'${setname}/${newname}@${username}'已存在`);
+            } else {
+              TableSet.findOneAndUpdate({ owner: username, name: setname }, { $pull: { tables: { name: tablename } } }).exec().then(() => {
+                ftable.name = newname;
+                TableSet.findOneAndUpdate({ owner: username, name: setname }, { $push: { tables: ftable } }, (err, doc) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve(doc);
+                  }
+                });
+              }).catch((err) => {
+                reject(err);
+              });
+            }
+          } else {
+            reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表集合'${setname}@${username}'不存在`)
+          }
+        }).catch((err) => {
+          reject(err);
+        });
+      } else {
+        reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 参数非法`);
+      }
+    });
+  }
 
 };
