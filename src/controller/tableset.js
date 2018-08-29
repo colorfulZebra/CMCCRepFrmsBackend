@@ -1,6 +1,6 @@
 'use strict';
-const TableSet = require('../model/tableset');
 const scriptPath = 'controller/tableset.js';
+let TableSet = require('../model/tableset');
 
 module.exports = {
 
