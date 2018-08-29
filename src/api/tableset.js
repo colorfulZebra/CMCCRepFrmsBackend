@@ -110,4 +110,23 @@ router.delete('/delete/table', function(req, res) {
   });
 });
 
+router.put('/rename/table', function(req, res) {
+  let username = req.body.owner;
+  let setname = req.body.name;
+  let tablename = req.body.table;
+  let newname = req.body.newname;
+  TableSet.renameTable(username, setname, tablename, newname).then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch((err) => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 module.exports = router;

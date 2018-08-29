@@ -14,6 +14,6 @@ let tablesetSchema = new Schema({
     }
   ]
 });
-tablesetSchema.index({ owner: 1, name: 1 }, { unique: true });
+tablesetSchema.index({ 'owner': 1, 'name': 1 }, { unique: true });
 
 module.exports = mongoose.model('TableSet', tablesetSchema);

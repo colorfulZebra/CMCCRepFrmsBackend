@@ -7,6 +7,7 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true
 });
 mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
 
 mongoose.connection.on('connected', function() {
   console.log('Mongoose connection open to ' + DB_URL);

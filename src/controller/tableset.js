@@ -110,11 +110,11 @@ module.exports = {
    */
   newTable: function(username, setname, tableDef) {
     return new Promise((resolve, reject) => {
-      if (typeof username === 'string' && typeof setname === 'string' &&
-          tableDef && tableDef.name && tableDef.columns && tableDef.rows &&
-          typeof tableDef.name === 'string' &&
-          Array.isArray(tableDef.columns) && tableDef.columns.length > 0 &&
-          Array.isArray(tableDef.rows) && tableDef.rows.length > 0) {
+      if (typeof username === 'string' && typeof setname === 'string'
+      && tableDef && tableDef.name && tableDef.columns && tableDef.rows
+      && typeof tableDef.name === 'string'
+      && Array.isArray(tableDef.columns) && tableDef.columns.length > 0
+      && Array.isArray(tableDef.rows) && tableDef.rows.length > 0) {
 
         TableSet.findOne({ owner: username, name: setname }).exec().then((doc) => { //首先检查是否有重复表
           if (doc) {
@@ -187,35 +187,24 @@ module.exports = {
    */
   renameTable: function(username, setname, tablename, newname) {
     return new Promise((resolve, reject) => {
-      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string' && typeof newname === 'string') {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string' && typeof newname === 'string' && tablename !== newname) {
         TableSet.findOne({ owner: username, name: setname }).exec().then((doc) => {
           if (doc) {
             let flag = false;
-            let ftable = {};
             doc.tables.map((t) => {
               if (t.name === newname) flag = true;
-              if (t.name === tablename) ftable = t;
             });
-            if (ftable.name === undefined) {
-              reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表'${setname}/${tablename}@${username}'不存在`);
-            } else if (flag) {
+            if (flag) {
               reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表'${setname}/${newname}@${username}'已存在`);
             } else {
-              TableSet.findOneAndUpdate({ owner: username, name: setname }, { $pull: { tables: { name: tablename } } }).exec().then(() => {
-                ftable.name = newname;
-                TableSet.findOneAndUpdate({ owner: username, name: setname }, { $push: { tables: ftable } }, (err, doc) => {
-                  if (err) {
-                    reject(err);
-                  } else {
-                    resolve(doc);
-                  }
-                });
+              TableSet.findOneAndUpdate({ 'owner': username, 'name': setname, 'tables.name': tablename }, { '$set': { 'tables.$.name': newname } }).exec().then(() => {
+                resolve(doc);
               }).catch((err) => {
                 reject(err);
               });
             }
           } else {
-            reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表集合'${setname}@${username}'不存在`)
+            reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 表集合'${setname}@${username}'不存在`);
           }
         }).catch((err) => {
           reject(err);
