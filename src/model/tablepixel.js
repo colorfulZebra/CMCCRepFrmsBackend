@@ -6,7 +6,7 @@ let tablePixelSchema = new Schema({
   name: String,
   excel: String,
   sheet: String,
-  keywords: [ String ],
+  keywords: String,
   rowindex: Number
 });
 

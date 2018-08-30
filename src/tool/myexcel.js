@@ -1,33 +1,5 @@
 'use strict';
-const XLSX = require('xlsx');
-
 const LARGE_WEIGHT = 1024;
-/**
- * Read excel file and parse content of sheet to json
- * @param {String} excelFilePath 
- * @param {String} sheetName 
- */
-function parseSheetOfExcel (excelFilePath, sheetName) {
-
-  let workbook;
-  let worksheet;
-
-  if (excelFilePath.endsWith && ( excelFilePath.endsWith('.xlsx') || excelFilePath.endsWith('.xls') || excelFilePath.endsWith('.xlsm'))) {
-    workbook = XLSX.readFile(excelFilePath);
-    
-    if (workbook.Sheets[sheetName]) {
-      worksheet = workbook.Sheets[sheetName];
-      return XLSX.utils.sheet_to_json(worksheet, {
-        header: 1,
-        blankrows: true
-      });
-    } else {
-      throw `Sheet “${sheetName}” 不存在于Excel文件 “${excelFilePath}” 中`;
-    }
-  } else {
-    throw `文件名 “${excelFilePath}” 不是合法Excel文件，后缀应为(xlsx，xls，xlsm)`;
-  }
-}
 
 /**
  * Find all indexes of keywords
@@ -195,16 +167,13 @@ function clusterEucDist (nodeCluster) {
 
 /**
  * 
+ * @param {JSON} sheetJson
  * @param {String} keywords 
  */
-module.exports = function (keywords) {
-  let keywordslst = keywords.split(' ');
-  let excelFilePath = keywordslst[0];
-  let excelSheet = keywordslst[1];
-  let seekKeywords = keywordslst.slice(2);
+module.exports = function (sheetJson, keywords) {
+  let seekKeywords = keywords.split(' ');
   return new Promise ((resolve, reject) => {
     try {
-      let sheetJson = parseSheetOfExcel(excelFilePath, excelSheet);
       let keyindexes = indexKeywords(sheetJson, seekKeywords);
       let minEucCluster = clusterKeywords(keyindexes);
       let result = locateResult(sheetJson, minEucCluster);

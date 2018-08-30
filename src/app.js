@@ -15,7 +15,8 @@ app.get('/', function (req, res) {
 app.use('/api/user', require('./api/user'));
 app.use('/api/excel', require('./api/excel'));
 app.use('/api/repfrm', require('./api/tableset'));
-app.use('/api/pixelcache', require('./api/tablepixelcache'));
+app.use('/api/pixel', require('./api/tablepixel'));
+// app.use('/api/pixelcache', require('./api/tablepixelcache'));
 
 let server = app.listen(config.port, function () {
 

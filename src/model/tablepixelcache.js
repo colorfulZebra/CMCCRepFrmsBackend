@@ -8,7 +8,11 @@ let tablePixelCacheSchema = new Schema({
   sheet: String,
   month: String,
   cachedate: Date,
-  value: String
+  value: {
+    row: Number,
+    col: Number,
+    val: String
+  }
 });
 
 module.exports = mongoose.model('TablePixelCache', tablePixelCacheSchema);

@@ -1,10 +1,7 @@
 'use strict';
 const scriptPath = 'controller/tablepixelcache.js';
 const regMonth = /\d{6}/;
-const moment = require('moment');
 let TablePixelCache = require('../model/tablepixelcache');
-
-moment.locale('zh-cn');
 
 module.exports = {
 
@@ -20,13 +17,15 @@ module.exports = {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string' && typeof excel === 'string' && typeof sheet === 'string'
       && typeof month === 'string' && regMonth.test(month)
-      && typeof value === 'string') {
+      && value !== undefined
+      && value.row !== undefined && typeof value.row === 'number'
+      && value.col !== undefined && typeof value.col === 'number'
+      && value.val !== undefined && typeof value.val === 'string') {
         new TablePixelCache({
           name,
           excel,
           sheet,
           month,
-          // cachedate: moment().format('YYYY-MM-DD HH:mm:ss.SS'),
           cachedate: new Date(),
           value
         }).save((err, doc) => {

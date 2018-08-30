@@ -1,10 +1,11 @@
 'use strict';
-const Excel = require('../model/excel');
 const path = require('path');
 const scriptPath = 'controller/excel.js';
 const fs = require('fs');
 const XLSX = require('xlsx');
 const regMonthID = /\d{6}/;
+let Excel = require('../model/excel');
+let myExcel = require('../tool/myexcel');
 
 module.exports = {
   /**
@@ -55,7 +56,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: recordExcel(excelPath, monthID) 参数不合法`);
+        reject(`${scriptPath}: recordExcel(excelPath, monthID) 参数非法`);
       }
     });
   },
@@ -112,7 +113,32 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: recordExcelOfFolder(folderPath, monthID) 参数不合法`);
+        reject(`${scriptPath}: recordExcelOfFolder(folderPath, monthID) 参数非法`);
+      }
+    });
+  },
+
+  cell: function(month, excel, sheet, keywords) {
+    return new Promise((resolve, reject) => {
+      if (typeof month === 'string' && regMonthID.test(month)
+      && typeof excel === 'string'
+      && typeof sheet === 'string'
+      && typeof keywords === 'string') {
+        Excel.findOne({ month, excel, sheet }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else if (!doc) {
+            reject(`${scriptPath}: cell(month, excel, sheet, keywords) 找不到记录${month}/${excel}/${sheet}`);
+          } else {
+            myExcel(doc.content, keywords).then((data) => {
+              resolve(data);
+            }).catch((err) => {
+              reject(err);
+            });
+          }
+        });
+      } else {
+        reject(`${scriptPath}: cell(month, excel, sheet, keywords) 参数非法`);
       }
     });
   }
