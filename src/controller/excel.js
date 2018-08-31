@@ -118,16 +118,47 @@ module.exports = {
     });
   },
 
+  /**
+   * Get excel doc by fuzzy query
+   * @param {String} month
+   * @param {String} excelFuz
+   * @param {String} sheetFuz
+   */
+  fuzzyQueryExcel: function(month, excelFuz, sheetFuz) {
+    return new Promise((resolve, reject) => {
+      if (typeof month === 'string' && regMonthID.test(month)
+      && typeof excelFuz === 'string'
+      && typeof sheetFuz === 'string') {
+        let regExcel = new RegExp(excelFuz);
+        let regSheet = new RegExp(sheetFuz);
+        Excel.findOne({ month, excel: regExcel, sheet: regSheet }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(doc);
+          }
+        });
+      } else {
+        reject(`${scriptPath}: getExcel(month, excelFuz, sheetFuz) 参数非法`);
+      }
+    });
+  },
+
+  /**
+   * Calculate cell value by keywords
+   * @param {String} month
+   * @param {String} excel
+   * @param {String} sheet
+   * @param {String} keywords
+   */
   cell: function(month, excel, sheet, keywords) {
     return new Promise((resolve, reject) => {
       if (typeof month === 'string' && regMonthID.test(month)
       && typeof excel === 'string'
       && typeof sheet === 'string'
       && typeof keywords === 'string') {
-        Excel.findOne({ month, excel, sheet }, (err, doc) => {
-          if (err) {
-            reject(err);
-          } else if (!doc) {
+        this.fuzzyQueryExcel(month, excel, sheet).then((doc) => {
+          if (!doc.content) {
             reject(`${scriptPath}: cell(month, excel, sheet, keywords) 找不到记录${month}/${excel}/${sheet}`);
           } else {
             myExcel(doc.content, keywords).then((data) => {
@@ -136,6 +167,8 @@ module.exports = {
               reject(err);
             });
           }
+        }).catch((err) => {
+          reject(err);
         });
       } else {
         reject(`${scriptPath}: cell(month, excel, sheet, keywords) 参数非法`);

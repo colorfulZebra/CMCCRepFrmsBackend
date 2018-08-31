@@ -7,6 +7,14 @@ let TablePixelCache = require('./tablepixelcache');
 
 module.exports = {
 
+  /**
+   * Add a new pixel
+   * @param {String} name
+   * @param {String} excel
+   * @param {String} sheet
+   * @param {String} keywords
+   * @param {Number} rowindex
+   */
   newPixel: function(name, excel, sheet, keywords, rowindex) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string'
@@ -33,6 +41,12 @@ module.exports = {
     });
   },
 
+  /**
+   * Delete pixel specified
+   * @param {String} name
+   * @param {String} excel
+   * @param {String} sheet
+   */
   deletePixel: function(name, excel, sheet) {
     return new Promise((resolve, reject) => {
       if (typeof name ==='string'
@@ -55,6 +69,9 @@ module.exports = {
     });
   },
 
+  /**
+   * Return all pixels
+   */
   allPixels: function() {
     return new Promise((resolve, reject) => {
       TablePixel.find({}, (err, docs) => {
@@ -67,6 +84,15 @@ module.exports = {
     });
   },
 
+  /**
+   * Calculate pixel value
+   * @param {String} month
+   * @param {String} excel
+   * @param {String} sheet
+   * @param {String} name
+   * @param {String} rowname
+   * @param {Boolean} cacheFlag
+   */
   getPixelValue: function(month, excel, sheet, name, rowname, cacheFlag) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string'
@@ -85,9 +111,9 @@ module.exports = {
               } else if (!doc) {
                 reject(`${scriptPath}: getPixelValue(month, excel, sheet, name, rowname, cacheFlag) 找不到指标'${excel}/${sheet}/${name}'`);
               } else {
-                let keywords = doc.keywords;
+                let keywords = doc.keywords.split(' ');
                 keywords.splice(doc.rowindex, 0, rowname);
-                Excel.cell(month, excel, sheet, keywords).then((data) => {
+                Excel.cell(month, excel, sheet, keywords.join(' ')).then((data) => {
                   resolve(data);
                 }).catch((err) => {
                   reject(err);

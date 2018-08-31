@@ -37,4 +37,40 @@ router.post('/new', function(req, res) {
   });
 });
 
+router.delete('/delete', function(req, res) {
+  let name = req.body.name;
+  let excel = req.body.excel;
+  let sheet = req.body.sheet;
+  TablePixel.deletePixel(name, excel, sheet).then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch((err) => {
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
+router.get('/value', function(req, res) {
+  let month = req.query.month;
+  let excel = req.query.excel;
+  let sheet = req.query.sheet;
+  let name = req.query.name;
+  let rowname = req.query.rowname;
+  TablePixel.getPixelValue(month, excel, sheet, name, rowname, true).then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch((err) => {
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 module.exports = router;
