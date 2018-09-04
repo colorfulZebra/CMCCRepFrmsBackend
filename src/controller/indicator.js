@@ -2,6 +2,7 @@
 const scriptPath = 'controller/indicator.js';
 const regMonth = /\d{6}/;
 const OPTS = [ '+', '-', '*', '/', '(', ')' ];
+const moment = require('moment');
 let Indicator = require('../model/indicator');
 let Cache = require('./cache');
 let TablePixel = require('./tablepixel');
@@ -79,6 +80,8 @@ module.exports = {
       if (typeof name === 'string'
       && typeof month === 'string' && regMonth.test(month)
       && typeof rowname === 'string') {
+        let lastMonth = moment(month, 'YYYYMM').subtract(1, 'month').format('YYYYMM');
+        let lastYear = moment(month, 'YYYYMM').subtract(1, 'year').format('YYYYMM');
         Cache.getCache(`indicator_${name}_${rowname}`, month).then((doc) => {
           if (doc.length === 1 && doc[0] !== undefined) {
             resolve(doc[0].value);
@@ -109,7 +112,13 @@ module.exports = {
                 for (let el of ruleItems) {
                   if (!opnd.includes(el) && !OPTS.includes(el)) {
                     opnd.push(el);
-                    opndPromise.push(TablePixel.getPixelValue(el, month, rowname));
+                    if (el.startsWith('上月')) {
+                      opndPromise.push(TablePixel.getPixelValue(el, lastMonth, rowname));
+                    } else if (el.startsWith('去年')) {
+                      opndPromise.push(TablePixel.getPixelValue(el, lastYear, rowname));
+                    } else {
+                      opndPromise.push(TablePixel.getPixelValue(el, month, rowname));
+                    }
                   }
                 }
                 Promise.all(opndPromise).then((res) => {
