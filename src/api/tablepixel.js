@@ -10,6 +10,7 @@ router.get('/query', function(req, res) {
       data: docs
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err
@@ -39,14 +40,13 @@ router.post('/new', function(req, res) {
 
 router.delete('/delete', function(req, res) {
   let name = req.body.name;
-  let excel = req.body.excel;
-  let sheet = req.body.sheet;
-  TablePixel.deletePixel(name, excel, sheet).then((doc) => {
+  TablePixel.deletePixel(name).then((doc) => {
     res.send({
       result: true,
       data: doc
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err
@@ -56,16 +56,15 @@ router.delete('/delete', function(req, res) {
 
 router.get('/value', function(req, res) {
   let month = req.query.month;
-  let excel = req.query.excel;
-  let sheet = req.query.sheet;
   let name = req.query.name;
   let rowname = req.query.rowname;
-  TablePixel.getPixelValue(month, excel, sheet, name, rowname, true).then((doc) => {
+  TablePixel.getPixelValue(name, month, rowname).then((doc) => {
     res.send({
       result: true,
       data: doc
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err

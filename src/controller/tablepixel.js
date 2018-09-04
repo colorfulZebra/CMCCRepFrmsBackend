@@ -47,15 +47,11 @@ module.exports = {
    * @param {String} excel
    * @param {String} sheet
    */
-  deletePixel: function(name, excel, sheet) {
+  deletePixel: function(name) {
     return new Promise((resolve, reject) => {
-      if (typeof name ==='string'
-      && typeof excel === 'string'
-      && typeof sheet === 'string') {
+      if (typeof name ==='string') {
         TablePixel.findOneAndRemove({
-          name,
-          excel,
-          sheet
+          name
         }, (err, doc) => {
           if (err) {
             reject(err);
@@ -64,7 +60,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: deletePixel(name, excel, sheet) 参数非法`);
+        reject(`${scriptPath}: deletePixel(name) 参数非法`);
       }
     });
   },
@@ -93,28 +89,29 @@ module.exports = {
    * @param {String} rowname
    * @param {Boolean} cacheFlag
    */
-  getPixelValue: function(month, excel, sheet, name, rowname, cacheFlag) {
+  getPixelValue: function(name, month, rowname) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string'
-      && typeof excel === 'string'
-      && typeof sheet === 'string'
       && typeof rowname === 'string'
-      && typeof month === 'string' && regMonth.test(month)
-      && typeof cacheFlag === 'boolean') {
-        TablePixelCache.getCache(`${name}_${rowname}`, excel, sheet, month).then((doc) => {
-          if (doc && doc.row !== undefined && doc.col !== undefined && doc.val !== undefined) {
-            resolve(doc);
+      && typeof month === 'string' && regMonth.test(month)) {
+        TablePixelCache.getCache(`pixel_${name}_${rowname}`, month).then((doc) => {
+          if (doc.length === 1 && doc[0].value !== undefined) {
+            resolve(doc[0].value);
           } else {
-            TablePixel.findOne({ name, excel, sheet }, (err, doc) => {
+            TablePixel.findOne({ name }, (err, doc) => {
               if (err) {
                 reject(err);
               } else if (!doc) {
-                reject(`${scriptPath}: getPixelValue(month, excel, sheet, name, rowname, cacheFlag) 找不到指标'${excel}/${sheet}/${name}'`);
+                reject(`${scriptPath}: getPixelValue(name, month, rowname) 找不到指标'${name}'`);
               } else {
                 let keywords = doc.keywords.split(' ');
                 keywords.splice(doc.rowindex, 0, rowname);
-                Excel.cell(month, excel, sheet, keywords.join(' ')).then((data) => {
-                  resolve(data);
+                Excel.cell(month, doc.excel, doc.sheet, keywords.join(' ')).then((data) => {
+                  TablePixelCache.cache(`pixel_${name}_${rowname}`, month, data).then(() => {
+                    resolve(data);
+                  }).catch((err) => {
+                    reject(err);
+                  });
                 }).catch((err) => {
                   reject(err);
                 });
@@ -125,7 +122,7 @@ module.exports = {
           reject(err);
         });
       } else {
-        reject(`${scriptPath}: getPixelValue(month, excel, sheet, name, rowname, cacheFlag) 参数非法`);
+        reject(`${scriptPath}: getPixelValue(name, month, rowname) 参数非法`);
       }
     });
   },
