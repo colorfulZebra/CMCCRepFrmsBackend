@@ -10,6 +10,6 @@ let tablePixelSchema = new Schema({
   rowindex: Number
 });
 
-tablePixelSchema.index({ 'name': 1, 'excel': 1, 'sheet': 1 }, { unique: true });
+tablePixelSchema.index({ 'name': 1 }, { unique: true });
 
 module.exports = mongoose.model('TablePixel', tablePixelSchema);

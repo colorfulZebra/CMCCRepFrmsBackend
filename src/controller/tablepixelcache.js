@@ -13,9 +13,9 @@ module.exports = {
    * @param {String} month
    * @param {String} value
    */
-  cache: function(name, excel, sheet, month, value) {
+  cache: function(name, month, value) {
     return new Promise((resolve, reject) => {
-      if (typeof name === 'string' && typeof excel === 'string' && typeof sheet === 'string'
+      if (typeof name === 'string'
       && typeof month === 'string' && regMonth.test(month)
       && value !== undefined
       && value.row !== undefined && typeof value.row === 'number'
@@ -23,8 +23,6 @@ module.exports = {
       && value.val !== undefined && typeof value.val === 'string') {
         new TablePixelCache({
           name,
-          excel,
-          sheet,
           month,
           cachedate: new Date(),
           value
@@ -36,7 +34,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: cache(name, excel, sheet, month, value) 参数非法`);
+        reject(`${scriptPath}: cache(name, month, value) 参数非法`);
       }
     });
   },
@@ -48,17 +46,17 @@ module.exports = {
    * @param {String} sheet
    * @param {String} month
    */
-  getCache: function(name, excel, sheet, month) {
+  getCache: function(name, month) {
     return new Promise((resolve, reject) => {
-      if (typeof name === 'string' && typeof excel === 'string' && typeof sheet === 'string'
+      if (typeof name === 'string'
       && typeof month === 'string' && regMonth.test(month)) {
-        TablePixelCache.find({ name, excel, sheet, month }).sort({ cachedate: -1 }).limit(1).exec().then((doc) => {
+        TablePixelCache.find({ name, month }).sort({ cachedate: -1 }).limit(1).exec().then((doc) => {
           resolve(doc);
         }).catch((err) => {
           reject(err);
         });
       } else {
-        reject(`${scriptPath}: getCache(name, excel, sheet, month) 参数非法`);
+        reject(`${scriptPath}: getCache(name, month) 参数非法`);
       }
     });
   }
