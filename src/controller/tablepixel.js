@@ -3,7 +3,7 @@ const scriptPath = 'controller/tablepixel.js';
 const regMonth = /\d{6}/;
 let Excel = require('./excel');
 let TablePixel = require('../model/tablepixel');
-let TablePixelCache = require('./tablepixelcache');
+let Cache = require('./cache');
 
 module.exports = {
 
@@ -94,7 +94,7 @@ module.exports = {
       if (typeof name === 'string'
       && typeof rowname === 'string'
       && typeof month === 'string' && regMonth.test(month)) {
-        TablePixelCache.getCache(`pixel_${name}_${rowname}`, month).then((doc) => {
+        Cache.getCache(`pixel_${name}_${rowname}`, month).then((doc) => {
           if (doc.length === 1 && doc[0].value !== undefined) {
             resolve(doc[0].value);
           } else {
@@ -102,12 +102,12 @@ module.exports = {
               if (err) {
                 reject(err);
               } else if (!doc) {
-                reject(`${scriptPath}: getPixelValue(name, month, rowname) 找不到指标'${name}'`);
+                reject(`${scriptPath}: getPixelValue(name, month, rowname) 无法找到对应指标'${name}'`);
               } else {
                 let keywords = doc.keywords.split(' ');
                 keywords.splice(doc.rowindex, 0, rowname);
                 Excel.cell(month, doc.excel, doc.sheet, keywords.join(' ')).then((data) => {
-                  TablePixelCache.cache(`pixel_${name}_${rowname}`, month, data).then(() => {
+                  Cache.cache(`pixel_${name}_${rowname}`, month, data).then(() => {
                     resolve(data);
                   }).catch((err) => {
                     reject(err);

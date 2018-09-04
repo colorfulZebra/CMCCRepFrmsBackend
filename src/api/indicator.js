@@ -48,4 +48,21 @@ router.delete('/delete', function(req, res) {
   });
 });
 
+router.get('/calculate', function(req, res) {
+  let name = req.query.name;
+  let month = req.query.month;
+  let rowname = req.query.rowname;
+  Indicator.calIndicator(name, month, rowname).then((doc) => {
+    res.send({
+      data: doc,
+      result: true
+    });
+  }).catch((err) => {
+    res.send({
+      data: err,
+      result: false
+    });
+  });
+});
+
 module.exports = router;

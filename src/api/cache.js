@@ -1,13 +1,13 @@
 'use strict';
 const express = require('express');
 let router = express.Router();
-let TablePixelCache = require('../controller/tablepixelcache');
+let Cache = require('../controller/cache');
 
 router.post('/set', function(req, res) {
   let name = req.body.name;
   let month = req.body.month;
   let value = req.body.value;
-  TablePixelCache.cache(name, month, value).then((doc) => {
+  Cache.cache(name, month, value).then((doc) => {
     res.send({
       result: true,
       data: doc
@@ -24,7 +24,7 @@ router.post('/set', function(req, res) {
 router.get('/get', function(req, res) {
   let month = req.query.month;
   let name = req.query.name;
-  TablePixelCache.getCache(name, month).then((doc) => {
+  Cache.getCache(name, month).then((doc) => {
     res.send({
       result: true,
       data: doc

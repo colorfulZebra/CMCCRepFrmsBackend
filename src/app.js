@@ -17,7 +17,7 @@ app.use('/api/excel', require('./api/excel'));
 app.use('/api/repfrm', require('./api/tableset'));
 app.use('/api/pixel', require('./api/tablepixel'));
 app.use('/api/indicator', require('./api/indicator'));
-app.use('/api/cache', require('./api/tablepixelcache'));
+app.use('/api/cache', require('./api/cache'));
 
 let server = app.listen(config.port, function () {
 

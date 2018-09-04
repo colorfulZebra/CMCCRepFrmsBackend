@@ -2,7 +2,7 @@
 const mongoose = require('../db');
 const Schema = mongoose.Schema;
 
-let tablePixelCacheSchema = new Schema({
+let cacheSchema = new Schema({
   name: String,
   month: String,
   cachedate: Date,
@@ -13,4 +13,4 @@ let tablePixelCacheSchema = new Schema({
   }
 });
 
-module.exports = mongoose.model('TablePixelCache', tablePixelCacheSchema);
+module.exports = mongoose.model('Cache', cacheSchema);

@@ -1,7 +1,7 @@
 'use strict';
-const scriptPath = 'controller/tablepixelcache.js';
+const scriptPath = 'controller/cache.js';
 const regMonth = /\d{6}/;
-let TablePixelCache = require('../model/tablepixelcache');
+let Cache = require('../model/cache');
 
 module.exports = {
 
@@ -21,7 +21,7 @@ module.exports = {
       && value.row !== undefined && typeof value.row === 'number'
       && value.col !== undefined && typeof value.col === 'number'
       && value.val !== undefined && typeof value.val === 'string') {
-        new TablePixelCache({
+        new Cache({
           name,
           month,
           cachedate: new Date(),
@@ -50,7 +50,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string'
       && typeof month === 'string' && regMonth.test(month)) {
-        TablePixelCache.find({ name, month }).sort({ cachedate: -1 }).limit(1).exec().then((doc) => {
+        Cache.find({ name, month }).sort({ cachedate: -1 }).limit(1).exec().then((doc) => {
           resolve(doc);
         }).catch((err) => {
           reject(err);
