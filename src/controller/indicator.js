@@ -92,21 +92,7 @@ module.exports = {
               } else if (!doc) {
                 reject(`${scriptPath}: calIndicator(name, month, rowname) 无法找到对应指标'${name}'`);
               } else {
-                let rule = doc.rule;
-                let ruleItems = [];
-                let opndstr = '';
-                for (let el of rule) {
-                  if (OPTS.includes(el)) {
-                    if (opndstr.trim() !== '') {
-                      ruleItems.push(opndstr);
-                      opndstr = '';
-                    }
-                    ruleItems.push(el);
-                  } else {
-                    opndstr += el;
-                  }
-                }
-                if (opndstr.trim() !== '') ruleItems.push(opndstr);
+                let ruleItems = this.parseRuleToItems(doc.rule);
                 let opnd = [];
                 let opndPromise = [];
                 for (let el of ruleItems) {
@@ -162,6 +148,116 @@ module.exports = {
         });
       } else {
         reject(`${scriptPath}: calIndicator(name, month, rowname) 参数非法`);
+      }
+    });
+  },
+
+  /**
+   * Tool function to parse rule to items
+   * @param {String} rule
+   */
+  parseRuleToItems: function(rule) {
+    if (typeof rule === 'string') {
+      let ruleItems = [];
+      let opndstr = '';
+      for (let el of rule) {
+        if (OPTS.includes(el)) {
+          if (opndstr.trim() !== '') {
+            ruleItems.push(opndstr.trim());
+            opndstr = '';
+          }
+          ruleItems.push(el);
+        } else {
+          opndstr += el;
+        }
+      }
+      if (opndstr.trim() !== '') ruleItems.push(opndstr.trim());
+      return ruleItems;
+    } else {
+      return [];
+    }
+  },
+
+  /**
+   * Recursive base function
+   * @param {Array} ruleItems
+   */
+  extend: function(ruleItems) {
+    return new Promise((resolve, reject) => {
+      Indicator.find({}, (err, docs) => {
+        if (err) {
+          reject(err);
+        } else {
+          let elidx = -1;
+          let elrule = '';
+          for (let idx = 0; idx < ruleItems.length; idx++) {
+            for (let el of docs) {
+              if (el.name === ruleItems[idx]) {
+                elidx = idx;
+                elrule = el.rule;
+                break;
+              }
+            }
+            if (elidx >= 0) {
+              break;
+            }
+          }
+          if (elidx >= 0) {
+            let elruleItems = this.parseRuleToItems(elrule);
+            elruleItems.unshift('(');
+            elruleItems.push(')');
+            let args = [elidx, 1].concat(elruleItems);
+            resolve({
+              idx: elidx,
+              args
+            });
+          } else {
+            resolve({
+              idx: elidx,
+              args: []
+            });
+          }
+        }
+      });
+    });
+  },
+  
+  /**
+   * Recursive function to extend rule expression
+   * @param {Array} ruleItems
+   */
+  extendAll: function(ruleItems) {
+    return this.extend(ruleItems).then(info => {
+      if (info.idx >= 0) {
+        Array.prototype.splice.apply(ruleItems, info.args);
+        return this.extendAll(ruleItems);
+      } else {
+        return ruleItems;
+      }
+    });
+  },
+
+  /**
+   * Test function to extend rule expression
+   * @param {String} name
+   */
+  extendOnly: function(name) {
+    return new Promise((resolve, reject) => {
+      if (typeof name === 'string') {
+        Indicator.findOne({ name }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else if (!doc) {
+            reject(`${scriptPath}: extendOnly(name) 无法找到对应指标'${name}'`);
+          } else {
+            let ruleItems = this.parseRuleToItems(doc.rule);
+            this.extendAll(ruleItems).then((exps) => {
+              resolve(exps.join(''));
+            });
+          }
+        });
+      } else {
+        reject(`${scriptPath}: extendOnly(name) 参数非法 `);
       }
     });
   }

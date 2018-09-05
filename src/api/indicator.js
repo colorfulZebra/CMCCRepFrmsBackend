@@ -35,10 +35,10 @@ router.post('/new', function(req, res) {
 
 router.delete('/delete', function(req, res) {
   let name = req.body.name;
-  Indicator.deleteIndicator(name).then((res) => {
+  Indicator.deleteIndicator(name).then((doc) => {
     res.send({
       result: true,
-      data: res
+      data: doc
     });
   }).catch((err) => {
     res.send({
@@ -55,6 +55,21 @@ router.get('/calculate', function(req, res) {
   Indicator.calIndicator(name, month, rowname).then((doc) => {
     res.send({
       data: doc,
+      result: true
+    });
+  }).catch((err) => {
+    res.send({
+      data: err,
+      result: false
+    });
+  });
+});
+
+router.get('/extend', function(req, res) {
+  let name = req.query.name;
+  Indicator.extendOnly(name).then((data) => {
+    res.send({
+      data,
       result: true
     });
   }).catch((err) => {
