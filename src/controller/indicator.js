@@ -213,11 +213,14 @@ const extend = (ruleItems) => new Promise((resolve, reject) => {
     } else {
       let elidx = -1;
       let elrule = '';
+      let elprefix = '';
       for (let idx = 0; idx < ruleItems.length; idx++) {
+        let name = dePrefix(ruleItems[idx]);
         for (let el of docs) {
-          if (el.name === ruleItems[idx]) {
+          if (el.name === name.realname) {
             elidx = idx;
             elrule = el.rule;
+            elprefix = name.prefix;
             break;
           }
         }
@@ -227,6 +230,11 @@ const extend = (ruleItems) => new Promise((resolve, reject) => {
       }
       if (elidx >= 0) {
         let elruleItems = parseRuleToItems(elrule);
+        for (let idx = 0; idx < elruleItems.length; idx++) {
+          if (!OPTS.includes(elruleItems[idx])) {
+            elruleItems[idx] = elprefix + elruleItems[idx];
+          }
+        }
         elruleItems.unshift('(');
         elruleItems.push(')');
         let args = [elidx, 1].concat(elruleItems);
@@ -257,3 +265,38 @@ const extendAll = (ruleItems) =>
       return ruleItems;
     }
   });
+
+/**
+ * Get prefix and real name of indicator 
+ * @param {String} name 
+ */
+const dePrefix = (name) => {
+  if (typeof name === 'string') {
+    if (name.startsWith('上月')) {
+      return {
+        prefix: '上月',
+        realname: name.slice('上月'.length)
+      };
+    } else if (name.startsWith('去年同期')) {
+      return {
+        prefix: '去年同期',
+        realname: name.slice('去年同期'.length)
+      };
+    } else if (/^\d{6}/.test(name)) {
+      return {
+        prefix: name.slice(0, 6),
+        realname: name.slice(6)
+      };
+    } else {
+      return {
+        prefix: '',
+        realname: name
+      };
+    }
+  } else {
+    return {
+      prefix: '',
+      realname: name
+    };
+  }
+};
