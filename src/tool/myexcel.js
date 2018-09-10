@@ -25,6 +25,11 @@ function indexKeywords (sheetJson, keywords) {
       }
     }
   }
+  keyIndexes.map((val, idx) => {
+    if (val.length === 0) {
+      throw `无法定位指标'${keywords[idx]}'`;
+    }
+  });
   return keyIndexes;
 }
 
@@ -106,8 +111,8 @@ function greedyCombine (lst) {
 
 /**
  * Tool function for clusterKeywords. Euclid distance of to nodes { row: number, col: number }
- * @param {object} nodex 
- * @param {object} nodey 
+ * @param {Object} nodex 
+ * @param {Object} nodey 
  */
 function eucDist (nodex, nodey) {
   if (nodex.row === undefined || nodex.col === undefined || nodey.row === undefined || nodey.col === undefined) {
@@ -168,7 +173,7 @@ function clusterEucDist (nodeCluster) {
 /**
  * 
  * @param {JSON} sheetJson
- * @param {String} keywords 
+ * @param {string} keywords 
  */
 module.exports = function (sheetJson, keywords) {
   let seekKeywords = keywords.split(' ');

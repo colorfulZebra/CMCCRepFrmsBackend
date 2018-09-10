@@ -20,7 +20,7 @@ router.get('/query/:username', function(req, res) {
 
 
 /***************************** REST api for tablesets ***************************/
-router.post('/new/set', function(req, res) {
+router.post('/set/new', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;
   TableSet.newSet(username, setname).then((doc) => {
@@ -37,7 +37,7 @@ router.post('/new/set', function(req, res) {
   });
 });
 
-router.delete('/delete/set', function(req, res) {
+router.delete('/set/delete', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;
   TableSet.deleteSet(username, setname).then((doc) => {
@@ -54,7 +54,7 @@ router.delete('/delete/set', function(req, res) {
   });
 });
 
-router.put('/rename/set', function(req, res) {
+router.put('/set/rename', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;
   let newname = req.body.newname;
@@ -74,7 +74,7 @@ router.put('/rename/set', function(req, res) {
 
 
 /***************************** REST api for tables ***************************/
-router.put('/new/table', function(req, res) {
+router.put('/table/new', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;
   let table  = req.body.table;
@@ -92,7 +92,7 @@ router.put('/new/table', function(req, res) {
   });
 });
 
-router.delete('/delete/table', function(req, res) {
+router.delete('/table/delete', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;
   let tablename = req.body.table;
@@ -110,7 +110,25 @@ router.delete('/delete/table', function(req, res) {
   });
 });
 
-router.put('/rename/table', function(req, res) {
+router.get('/table/gen', function(req, res) {
+  let setname = req.query.setname;
+  let tablename = req.query.tablename;
+  let month = req.query.month;
+  TableSet.genTable(setname, tablename, month).then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch(err => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
+router.put('/table/rename', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;
   let tablename = req.body.table;

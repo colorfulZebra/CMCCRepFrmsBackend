@@ -1,6 +1,8 @@
 'use strict';
 const scriptPath = 'controller/tableset.js';
 let TableSet = require('../model/tableset');
+let Pixels = require('./tablepixel');
+let Indicators = require('./indicator');
 
 module.exports = {
 
@@ -180,6 +182,46 @@ module.exports = {
         });
       } else {
         reject(`${scriptPath}: deleteTable(username, setname, tablename) 参数非法`);
+      }
+    });
+  },
+
+  genTable: function(setname, tablename, month) {
+    return new Promise((resolve, reject) => {
+      if (typeof setname === 'string' && typeof tablename === 'string' && typeof month === 'string' && /\d{6}/.test(month)) {
+        TableSet.findOne({ name: setname }, (err, setdoc) => {
+          if (err) {
+            reject(err);
+          } else {
+            let table;
+            setdoc.tables.map(t => {
+              if (t.name === tablename) table = t;
+            });
+            if (table !== undefined) {
+              Promise.all([Pixels.allPixels, Indicators.allIndicators]).then(docs => {
+                let pixels = docs[0];
+                let indicators = docs[1];
+                let combines = table.rows.map(row => {
+                  return table.columns.map(col => {
+                    // Check if column in pixels, add promise
+                    // Check if column in indicators, add promise
+                    // Else throw exception
+                    // Execution promise to get all value
+                    // Generate Excel
+                    return `${col}_${row}`;
+                  });
+                });
+                resolve(combines);
+              }).catch(err => {
+                reject(err);
+              });
+            } else {
+              reject(`${scriptPath}: genTable(setname, tablename, month) 找不到记录${setname}/${tablename}`);
+            }
+          }
+        });
+      } else {
+        reject(`${scriptPath}: genTable(setname, tablename, month) 参数非法`);
       }
     });
   },

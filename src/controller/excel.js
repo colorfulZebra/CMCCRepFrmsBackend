@@ -168,11 +168,11 @@ module.exports = {
             myExcel(doc.content, keywords).then((data) => {
               resolve(data);
             }).catch((err) => {
-              reject(err);
+              reject(`${scriptPath}: cell(month, excel, sheet, keywords) ${err}`);
             });
           }
         }).catch((err) => {
-          reject(err);
+          reject(`${scriptPath}: cell(month, excel, sheet, keywords) ${err}`);
         });
       } else {
         reject(`${scriptPath}: cell(month, excel, sheet, keywords) 参数非法`);

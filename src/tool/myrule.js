@@ -30,7 +30,8 @@ const RECOGNISE_OPT = Object.keys(OPTR_PRIORITY);
 
 /**
  * Calculate the expression
- * @param {String} rule 
+ * @param {string} rule 
+ * @return {string}: Result of expression
  */
 function analyze(rule) {
   if (typeof rule !== 'string') {
