@@ -7,6 +7,7 @@ module.exports = {
   /**
    * add new user
    * @param {Object} newUser
+   * @return {Promise}
    */
   insert: function(newUser) {
     return new Promise((resolve, reject) => {
@@ -29,7 +30,8 @@ module.exports = {
 
   /**
    * query user in database by name
-   * @param {String} name
+   * @param {string} name
+   * @return {Promise}
    */
   findByName: function(name) {
     return new Promise((resolve, reject) => {
@@ -50,6 +52,7 @@ module.exports = {
   /**
    * check username and password then authentication
    * @param {Object} userInfo
+   * @return {Promise}
    */
   checkIn: function(userInfo) {
     return new Promise((resolve, reject) => {

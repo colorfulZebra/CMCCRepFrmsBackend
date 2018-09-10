@@ -2,7 +2,7 @@
 const scriptPath = 'controller/indicator.js';
 const regMonth = /\d{6}/;
 const OPTS = [ '+', '-', '*', '/', '(', ')' ];
-// const moment = require('moment');
+const moment = require('moment');
 let Indicator = require('../model/indicator');
 let Cache = require('./cache');
 let TablePixel = require('./tablepixel');
@@ -12,21 +12,32 @@ module.exports = {
 
   /**
    * Add new indicator
-   * @param {String} name
-   * @param {String} rule
+   * @param {string} name
+   * @param {string} rule
+   * @return {Promise}
    */
   newIndicator: function(name, rule) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string' && typeof rule === 'string') {
-        new Indicator({
-          name,
-          rule
-        }).save((err, doc) => {
-          if (err) {
-            reject(err);
+        TablePixel.allPixels().then((pixs) => {
+          let repeat = false;
+          pixs.map(p => {if(p.name === name) repeat = true;});
+          if (repeat) {
+            reject(`${scriptPath}: newIndicator(name, rule) 指标名'${name}'已被定义为Excel指标`);
           } else {
-            resolve(doc);
+            new Indicator({
+              name,
+              rule
+            }).save((err, doc) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(doc);
+              }
+            });
           }
+        }).catch(err => {
+          reject(err);
         });
       } else {
         reject(`${scriptPath}: newIndicator(name, rule) 参数非法`);
@@ -36,6 +47,7 @@ module.exports = {
 
   /**
    * Get all indicators
+   * @return {Promise}
    */
   allIndicators: function() {
     return new Promise((resolve, reject) => {
@@ -51,7 +63,8 @@ module.exports = {
 
   /**
    * Delete indicator by name
-   * @param {String} name
+   * @param {string} name
+   * @return {Promise}
    */
   deleteIndicator: function(name) {
     return new Promise((resolve, reject) => {
@@ -71,17 +84,15 @@ module.exports = {
 
   /**
    * Calculate indicator expression
-   * @param {String} name
-   * @param {String} month
-   * @param {String} rowname
+   * @param {string} name
+   * @param {string} month
+   * @param {string} rowname
    */
   calIndicator: function(name, month, rowname) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string'
       && typeof month === 'string' && regMonth.test(month)
       && typeof rowname === 'string') {
-        // let lastMonth = moment(month, 'YYYYMM').subtract(1, 'month').format('YYYYMM');
-        // let lastYear = moment(month, 'YYYYMM').subtract(1, 'year').format('YYYYMM');
         Cache.getCache(`indicator_${name}_${rowname}`, month).then((doc) => {
           if (doc.length === 1 && doc[0] !== undefined) {
             resolve(doc[0].value);
@@ -99,7 +110,8 @@ module.exports = {
                   for (let el of ruleItems) {
                     if (!opnd.includes(el) && !OPTS.includes(el)) {
                       opnd.push(el);
-                      opndPromise.push(TablePixel.getPixelValue(el, month, rowname));
+                      let calargs = parsePrefix(el, month);
+                      opndPromise.push(TablePixel.getPixelValue(calargs.name, calargs.month, rowname));
                     }
                   }
                   Promise.all(opndPromise).then((res) => {
@@ -152,7 +164,8 @@ module.exports = {
 
   /**
    * Test function to extend rule expression
-   * @param {String} name
+   * @param {string} name
+   * @return {Promise}
    */
   extendOnly: function(name) {
     return new Promise((resolve, reject) => {
@@ -178,7 +191,8 @@ module.exports = {
 
 /**
  * Parse rule string to rule item list
- * @param {String} rule 
+ * @param {string} rule 
+ * @return {Promise}
  */
 const parseRuleToItems = (rule) => {
   if (typeof rule === 'string') {
@@ -205,6 +219,7 @@ const parseRuleToItems = (rule) => {
 /**
  * Get index and extend array of complex indicator
  * @param {Array} ruleItems 
+ * @return {Promise}
  */
 const extend = (ruleItems) => new Promise((resolve, reject) => {
   Indicator.find({}, (err, docs) => {
@@ -255,6 +270,7 @@ const extend = (ruleItems) => new Promise((resolve, reject) => {
 /**
  * Recursive analyze complex rule expression
  * @param {Array} ruleItems 
+ * @return {Promise}
  */
 const extendAll = (ruleItems) =>
   extend(ruleItems).then(info => {
@@ -268,7 +284,8 @@ const extendAll = (ruleItems) =>
 
 /**
  * Get prefix and real name of indicator 
- * @param {String} name 
+ * @param {string} name 
+ * @return {Promise}
  */
 const dePrefix = (name) => {
   if (typeof name === 'string') {
@@ -297,6 +314,38 @@ const dePrefix = (name) => {
     return {
       prefix: '',
       realname: name
+    };
+  }
+};
+
+/**
+ * Parse indicator name with month
+ * @param {string} name 
+ * @param {string} month 
+ */
+const parsePrefix = (name, month) => {
+  let lastMonth = moment(month, 'YYYYMM').subtract(1, 'month').format('YYYYMM');
+  let lastYear = moment(month, 'YYYYMM').subtract(1, 'year').format('YYYYMM');
+  let deprefixedName = dePrefix(name);
+  if (deprefixedName.prefix === '上月') {
+    return {
+      month: lastMonth,
+      name: deprefixedName.realname
+    };
+  } else if (deprefixedName.prefix === '去年同期') {
+    return {
+      month: lastYear,
+      name: deprefixedName.realname
+    };
+  } else if (/\d{6}/.test(deprefixedName.prefix)) {
+    return {
+      month: deprefixedName.prefix,
+      name: deprefixedName.realname
+    };
+  } else {
+    return {
+      month,
+      name
     };
   }
 };

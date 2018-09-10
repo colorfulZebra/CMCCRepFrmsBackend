@@ -10,8 +10,9 @@ let myExcel = require('../tool/myexcel');
 module.exports = {
   /**
    * Record excel content in db
-   * @param {String} excelPath
-   * @param {String} monthID
+   * @param {string} excelPath
+   * @param {string} monthID
+   * @return {Promise}
    */
   recordExcel: function(excelPath, monthID) {
     return new Promise((resolve, reject) => {
@@ -63,8 +64,9 @@ module.exports = {
 
   /**
    * Record all excels in specifield folder
-   * @param {String} folderPath
-   * @param {String} monthID
+   * @param {string} folderPath
+   * @param {string} monthID
+   * @return {Promise}
    */
   recordExcelsOfFolder: function(folderPath, monthID) {
     return new Promise((resolve, reject) => {
@@ -120,9 +122,10 @@ module.exports = {
 
   /**
    * Get excel doc by fuzzy query
-   * @param {String} month
-   * @param {String} excelFuz
-   * @param {String} sheetFuz
+   * @param {string} month
+   * @param {string} excelFuz
+   * @param {string} sheetFuz
+   * @return {Promise}
    */
   fuzzyQueryExcel: function(month, excelFuz, sheetFuz) {
     return new Promise((resolve, reject) => {
@@ -146,10 +149,11 @@ module.exports = {
 
   /**
    * Calculate cell value by keywords
-   * @param {String} month
-   * @param {String} excel
-   * @param {String} sheet
-   * @param {String} keywords
+   * @param {string} month
+   * @param {string} excel
+   * @param {string} sheet
+   * @param {string} keywords
+   * @return {Promise}
    */
   cell: function(month, excel, sheet, keywords) {
     return new Promise((resolve, reject) => {

@@ -9,11 +9,11 @@ module.exports = {
 
   /**
    * Add a new pixel
-   * @param {String} name
-   * @param {String} excel
-   * @param {String} sheet
-   * @param {String} keywords
-   * @param {Number} rowindex
+   * @param {string} name
+   * @param {string} excel
+   * @param {string} sheet
+   * @param {string} keywords
+   * @param {number} rowindex
    */
   newPixel: function(name, excel, sheet, keywords, rowindex) {
     return new Promise((resolve, reject) => {
@@ -43,9 +43,9 @@ module.exports = {
 
   /**
    * Delete pixel specified
-   * @param {String} name
-   * @param {String} excel
-   * @param {String} sheet
+   * @param {string} name
+   * @param {string} excel
+   * @param {string} sheet
    */
   deletePixel: function(name) {
     return new Promise((resolve, reject) => {
@@ -82,12 +82,12 @@ module.exports = {
 
   /**
    * Calculate pixel value
-   * @param {String} month
-   * @param {String} excel
-   * @param {String} sheet
-   * @param {String} name
-   * @param {String} rowname
-   * @param {Boolean} cacheFlag
+   * @param {string} month
+   * @param {string} excel
+   * @param {string} sheet
+   * @param {string} name
+   * @param {string} rowname
+   * @param {boolean} cacheFlag
    */
   getPixelValue: function(name, month, rowname) {
     return new Promise((resolve, reject) => {

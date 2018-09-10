@@ -7,11 +7,11 @@ module.exports = {
 
   /**
    * Cache pixel value in mongodb
-   * @param {String} name
-   * @param {String} excel
-   * @param {String} sheet
-   * @param {String} month
-   * @param {String} value
+   * @param {string} name
+   * @param {string} excel
+   * @param {string} sheet
+   * @param {string} month
+   * @param {string} value
    */
   cache: function(name, month, value) {
     return new Promise((resolve, reject) => {
@@ -41,10 +41,10 @@ module.exports = {
 
   /**
    * Get cached value of pixel in mongodb
-   * @param {String} name
-   * @param {String} excel
-   * @param {String} sheet
-   * @param {String} month
+   * @param {string} name
+   * @param {string} excel
+   * @param {string} sheet
+   * @param {string} month
    */
   getCache: function(name, month) {
     return new Promise((resolve, reject) => {

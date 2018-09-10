@@ -6,7 +6,8 @@ module.exports = {
 
   /**
    * Find all tables of the specifield user
-   * @param {String} username
+   * @param {string} username
+   * @return {Promise}
    */
   findTablesByUser: function(username) {
     return new Promise((resolve, reject) => {
@@ -26,8 +27,9 @@ module.exports = {
 
   /**
    * Create a new table set
-   * @param {String} username
-   * @param {String} setname
+   * @param {string} username
+   * @param {string} setname
+   * @return {Promise}
    */
   newSet: function(username, setname) {
     return new Promise((resolve, reject) => {
@@ -51,8 +53,9 @@ module.exports = {
 
   /**
    * Delete the specifield table set
-   * @param {String} username
-   * @param {String} setname
+   * @param {string} username
+   * @param {string} setname
+   * @return {Promise}
    */
   deleteSet: function(username, setname) {
     return new Promise((resolve, reject) => {
@@ -82,9 +85,10 @@ module.exports = {
 
   /**
    * Rename table set
-   * @param {String} username
-   * @param {String} setname
-   * @param {String} newname
+   * @param {string} username
+   * @param {string} setname
+   * @param {string} newname
+   * @return {Promise}
    */
   renameSet: function(username, setname, newname) {
     return new Promise((resolve, reject) => {
@@ -104,9 +108,10 @@ module.exports = {
 
   /**
    * Add new table
-   * @param {String} username
-   * @param {String} setname
+   * @param {string} username
+   * @param {string} setname
    * @param {Object} tableDef
+   * @return {Promise}
    */
   newTable: function(username, setname, tableDef) {
     return new Promise((resolve, reject) => {
@@ -158,9 +163,10 @@ module.exports = {
 
   /**
    * Delete table by tablename
-   * @param {String} username
-   * @param {String} setname
-   * @param {String} tablename
+   * @param {string} username
+   * @param {string} setname
+   * @param {string} tablename
+   * @return {Promise}
    */
   deleteTable: function(username, setname, tablename) {
     return new Promise((resolve, reject) => {
@@ -180,10 +186,11 @@ module.exports = {
 
   /**
    * Rename table
-   * @param {String} username
-   * @param {String} setname
-   * @param {String} tablename
-   * @param {String} newname
+   * @param {string} username
+   * @param {string} setname
+   * @param {string} tablename
+   * @param {string} newname
+   * @return {Promise}
    */
   renameTable: function(username, setname, tablename, newname) {
     return new Promise((resolve, reject) => {
