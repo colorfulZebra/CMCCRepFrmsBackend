@@ -239,20 +239,21 @@ module.exports = {
                 // Execution promise to get all value
                 Promise.all(tablePromise).then(docs => {
                   let headers = [];
+                  headers.push(tablename);
                   table.columns.map(col => {
                     headers.push(col.label);
                   });
                   let data = [];
-                  let rowitems = {};
+                  data.push(headers);
+                  let rowitems = [];
+                  rowitems.push(table.rows[0]);
                   docs.map((el, idx) => {
-                    if (idx % table.columns.length === 0) {
-                      if (idx !== 0) {
-                        data.push(rowitems);
-                        rowitems = {};
-                      }
-                      rowitems[tablename] = table.rows[Math.floor(idx/table.columns.length)];
+                    if (idx && idx % table.columns.length === 0) {
+                      data.push(rowitems);
+                      rowitems = [];
+                      rowitems.push(table.rows[Math.floor(idx / table.columns.length)]);
                     }
-                    rowitems[headers[idx % table.columns.length]] = el.val;
+                    rowitems.push(parseFloat(parseFloat(el.val.replace(/,(?=[\d,]*\.\d{2}\b)/g,'')).toFixed(4)));
                   });
                   resolve(data);
                 }).catch(err => {
@@ -277,24 +278,18 @@ module.exports = {
    * Generate xlsx file by 'data' and 'headers' (optional)
    * @param {String} sheetName
    * @param {Array} data
-   * @param {Array} headers
    */
-  genXLSX: function(username, sheetname, data, headers=[]) {
+  genXLSX: function(username, sheetname, data) {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string' && typeof sheetname === 'string' && Array.isArray(data)) {
         let wb = XLSX.utils.book_new();
-        let ws;
-        if (headers.length) {
-          ws = XLSX.utils.json_to_sheet(data, headers);
-        } else {
-          ws = XLSX.utils.json_to_sheet(data);
-        }
+        let ws = XLSX.utils.json_to_sheet(data, { skipHeader: true });
         XLSX.utils.book_append_sheet(wb, ws, sheetname);
         let filename = `${config.downloadDir}${path.sep}${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
         XLSX.writeFile(wb, filename);
         resolve(filename);
       } else {
-        reject(`${scriptPath}: genXLSX(username, sheetname, data, headers(optional)) 参数非法`);
+        reject(`${scriptPath}: genXLSX(username, sheetname, data) 参数非法`);
       }
     });
   },
