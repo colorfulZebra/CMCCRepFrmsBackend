@@ -1,5 +1,10 @@
 'use strict';
 const scriptPath = 'controller/tableset.js';
+const XLSX = require('xlsx');
+const config = require('../config');
+const path = require('path');
+const moment = require('moment');
+const randomstr = require('randomstring');
 let TableSet = require('../model/tableset');
 let Pixels = require('./tablepixel');
 let Indicators = require('./indicator');
@@ -186,10 +191,16 @@ module.exports = {
     });
   },
 
-  genTable: function(setname, tablename, month) {
+  /**
+   * Generate table content
+   * @param {String} username
+   * @param {String} setname
+   * @param {String} tablename
+   */
+  genTable: function(username, setname, tablename) {
     return new Promise((resolve, reject) => {
-      if (typeof setname === 'string' && typeof tablename === 'string' && typeof month === 'string' && /\d{6}/.test(month)) {
-        TableSet.findOne({ name: setname }, (err, setdoc) => {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string') {
+        TableSet.findOne({ owner: username, name: setname }, (err, setdoc) => {
           if (err) {
             reject(err);
           } else {
@@ -198,30 +209,92 @@ module.exports = {
               if (t.name === tablename) table = t;
             });
             if (table !== undefined) {
-              Promise.all([Pixels.allPixels, Indicators.allIndicators]).then(docs => {
+              Promise.all([Pixels.allPixels(), Indicators.allIndicators()]).then(docs => {
                 let pixels = docs[0];
                 let indicators = docs[1];
-                let combines = table.rows.map(row => {
-                  return table.columns.map(col => {
+                let tablePromise = [];
+                table.rows.map(row => {
+                  table.columns.map(col => {
+                    let flag = false;
                     // Check if column in pixels, add promise
+                    pixels.map(pix => {
+                      if (pix.name === col.name) {
+                        flag = true;
+                        tablePromise.push(Pixels.getPixelValue(col.name, col.month, row));
+                      }
+                    });
                     // Check if column in indicators, add promise
+                    indicators.map(ind => {
+                      if (ind.name === col.name) {
+                        flag = true;
+                        tablePromise.push(Indicators.calIndicator(col.name, col.month, row));
+                      }
+                    });
                     // Else throw exception
-                    // Execution promise to get all value
-                    // Generate Excel
-                    return `${col}_${row}`;
+                    if (!flag) {
+                      reject(`${scriptPath}: genTable(username, setname, tablename) 无法找到指标或者Excel元素'${col.name}'`);
+                    }
                   });
                 });
-                resolve(combines);
+                // Execution promise to get all value
+                Promise.all(tablePromise).then(docs => {
+                  let headers = [];
+                  table.columns.map(col => {
+                    headers.push(col.label);
+                  });
+                  let data = [];
+                  let rowitems = {};
+                  docs.map((el, idx) => {
+                    if (idx % table.columns.length === 0) {
+                      if (idx !== 0) {
+                        data.push(rowitems);
+                        rowitems = {};
+                      }
+                      rowitems[tablename] = table.rows[Math.floor(idx/table.columns.length)];
+                    }
+                    rowitems[headers[idx % table.columns.length]] = el.val;
+                  });
+                  resolve(data);
+                }).catch(err => {
+                  reject(err);
+                });
+                // Generate Excel
               }).catch(err => {
                 reject(err);
               });
             } else {
-              reject(`${scriptPath}: genTable(setname, tablename, month) 找不到记录${setname}/${tablename}`);
+              reject(`${scriptPath}: genTable(username, setname, tablename) 找不到记录'${setname}/${tablename}'`);
             }
           }
         });
       } else {
-        reject(`${scriptPath}: genTable(setname, tablename, month) 参数非法`);
+        reject(`${scriptPath}: genTable(username, setname, tablename) 参数非法`);
+      }
+    });
+  },
+
+  /**
+   * Generate xlsx file by 'data' and 'headers' (optional)
+   * @param {String} sheetName
+   * @param {Array} data
+   * @param {Array} headers
+   */
+  genXLSX: function(username, sheetname, data, headers=[]) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && typeof sheetname === 'string' && Array.isArray(data)) {
+        let wb = XLSX.utils.book_new();
+        let ws;
+        if (headers.length) {
+          ws = XLSX.utils.json_to_sheet(data, headers);
+        } else {
+          ws = XLSX.utils.json_to_sheet(data);
+        }
+        XLSX.utils.book_append_sheet(wb, ws, sheetname);
+        let filename = `${config.downloadDir}${path.sep}${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        resolve(filename);
+      } else {
+        reject(`${scriptPath}: genXLSX(username, sheetname, data, headers(optional)) 参数非法`);
       }
     });
   },

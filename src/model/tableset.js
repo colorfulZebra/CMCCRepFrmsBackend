@@ -8,7 +8,11 @@ let tablesetSchema = new Schema({
   tables: [
     {
       name: String,
-      columns: [ String ],
+      columns: [{
+        label: String,
+        name: String,
+        month: String
+      }],
       rows: [ String ],
       observer: [ String ]
     }

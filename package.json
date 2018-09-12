@@ -25,6 +25,7 @@
     "md5": "^2.2.1",
     "moment": "^2.22.2",
     "mongoose": "^5.2.12",
+    "randomstring": "^1.1.5",
     "xlsx": "^0.13.5"
   },
   "devDependencies": {

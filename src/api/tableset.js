@@ -111,16 +111,35 @@ router.delete('/table/delete', function(req, res) {
 });
 
 router.get('/table/gen', function(req, res) {
-  let setname = req.query.setname;
-  let tablename = req.query.tablename;
-  let month = req.query.month;
-  TableSet.genTable(setname, tablename, month).then((doc) => {
+  let username = req.query.owner;
+  let setname = req.query.name;
+  let tablename = req.query.table;
+  TableSet.genTable(username, setname, tablename).then((doc) => {
     res.send({
       result: true,
       data: doc
     });
   }).catch(err => {
     console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
+router.get('/table/download', function(req, res) {
+  let username = req.query.owner;
+  let setname = req.query.name;
+  let tablename = req.query.table;
+  TableSet.genTable(username, setname, tablename).then(doc => {
+    return TableSet.genXLSX(username, setname, doc);
+  }).then(file => {
+    res.send({
+      result: true,
+      data: file
+    });
+  }).catch(err => {
     res.send({
       result: false,
       data: err
