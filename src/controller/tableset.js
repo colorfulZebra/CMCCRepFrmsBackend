@@ -193,9 +193,9 @@ module.exports = {
 
   /**
    * Generate table content
-   * @param {String} username
-   * @param {String} setname
-   * @param {String} tablename
+   * @param {string} username
+   * @param {string} setname
+   * @param {string} tablename
    */
   genTable: function(username, setname, tablename) {
     return new Promise((resolve, reject) => {
@@ -255,7 +255,11 @@ module.exports = {
                     }
                     rowitems.push(parseFloat(parseFloat(el.val.replace(/,(?=[\d,]*\.\d{2}\b)/g,'')).toFixed(4)));
                   });
-                  resolve(data);
+                  resolve({
+                    setname,
+                    table: tablename,
+                    data
+                  });
                 }).catch(err => {
                   reject(err);
                 });
@@ -275,8 +279,30 @@ module.exports = {
   },
 
   /**
+   * Generate table data array by table list
+   * @param {string} username
+   * @param {Array} tablelist
+   */
+  genTables: function(username, tablelist) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && Array.isArray(tablelist)) {
+        let tablePromises = tablelist.map(tb => {
+          return this.genTable(username, tb.set, tb.name);
+        });
+        Promise.all(tablePromises).then(tabledocs => {
+          resolve(tabledocs);
+        }).catch(err => {
+          reject(err);
+        });
+      } else {
+        reject(`${scriptPath}: genTables(username, tablelist) 参数非法`);
+      }
+    });
+  },
+
+  /**
    * Generate xlsx file by 'data' and 'headers' (optional)
-   * @param {String} sheetName
+   * @param {string} sheetName
    * @param {Array} data
    */
   genXLSX: function(username, sheetname, data) {
@@ -290,6 +316,16 @@ module.exports = {
         resolve(filename);
       } else {
         reject(`${scriptPath}: genXLSX(username, sheetname, data) 参数非法`);
+      }
+    });
+  },
+
+  genXLSXs: function(username, tabledocs) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && Array.isArray(tabledocs)) {
+        let wb = XLSX.utils.book_new();
+      } else {
+        reject(`${scriptPath}: genXLSXs(username, tabledocs) 参数非法`);
       }
     });
   },

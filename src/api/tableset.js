@@ -128,12 +128,29 @@ router.get('/table/gen', function(req, res) {
   });
 });
 
+router.post('/table/genall', function(req, res) {
+  let username = req.body.owner;
+  let tablelist = req.body.tables;
+  TableSet.genTables(username, tablelist).then(docs => {
+    res.send({
+      result: true,
+      data: docs
+    });
+  }).catch(err => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 router.get('/table/download', function(req, res) {
   let username = req.query.owner;
   let setname = req.query.name;
   let tablename = req.query.table;
   TableSet.genTable(username, setname, tablename).then(doc => {
-    return TableSet.genXLSX(username, setname, doc);
+    return TableSet.genXLSX(username, doc.setname, doc.data);
   }).then(file => {
     res.send({
       result: true,
