@@ -164,6 +164,24 @@ router.get('/table/download', function(req, res) {
   });
 });
 
+router.post('/table/downloadall', function(req, res) {
+  let username = req.body.owner;
+  let tablelist = req.body.tables;
+  TableSet.genTables(username, tablelist).then(docs => {
+    return TableSet.genXLSXs(username, docs);
+  }).then(file => {
+    res.send({
+      result: true,
+      data: file
+    });
+  }).catch(err => {
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 router.put('/table/rename', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;

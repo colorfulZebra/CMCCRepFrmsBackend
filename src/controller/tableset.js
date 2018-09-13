@@ -324,6 +324,24 @@ module.exports = {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string' && Array.isArray(tabledocs)) {
         let wb = XLSX.utils.book_new();
+        for (let td of tabledocs) {
+          if (wb.SheetNames.includes(td.setname)) {
+            let ws = wb.Sheets[td.setname];
+            let wsRange = ws['!ref'];
+            let match = /[a-zA-Z]+[0-9]+:[a-zA-Z]+([0-9]+)/.exec(wsRange);
+            let ttcol = parseInt(match[1]);
+            if (isNaN(ttcol)) {
+              reject(`${scriptPath}: genXLSXs(username, tabledocs) 获取sheet'${td.setname}'范围错误`);
+            }
+            XLSX.utils.sheet_add_json(ws, td.data, { skipHeader: true, origin: ttcol + 2 });
+          } else {
+            let ws = XLSX.utils.json_to_sheet(td.data, { skipHeader: true });
+            XLSX.utils.book_append_sheet(wb, ws, td.setname);
+          }
+        }
+        let filename = `${config.downloadDir}${path.sep}${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
+        XLSX.writeFile(wb, filename);
+        resolve(filename);
       } else {
         reject(`${scriptPath}: genXLSXs(username, tabledocs) 参数非法`);
       }
