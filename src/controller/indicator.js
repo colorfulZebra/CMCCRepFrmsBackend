@@ -19,25 +19,15 @@ module.exports = {
   newIndicator: function(name, rule) {
     return new Promise((resolve, reject) => {
       if (typeof name === 'string' && typeof rule === 'string') {
-        TablePixel.allPixels().then((pixs) => {
-          let repeat = false;
-          pixs.map(p => {if(p.name === name) repeat = true;});
-          if (repeat) {
-            reject(`${scriptPath}: newIndicator(name, rule) 指标名'${name}'已被定义为Excel指标`);
+        new Indicator({
+          name,
+          rule
+        }).save((err, doc) => {
+          if (err) {
+            reject(err);
           } else {
-            new Indicator({
-              name,
-              rule
-            }).save((err, doc) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(doc);
-              }
-            });
+            resolve(doc);
           }
-        }).catch(err => {
-          reject(err);
         });
       } else {
         reject(`${scriptPath}: newIndicator(name, rule) 参数非法`);
@@ -177,6 +167,7 @@ module.exports = {
             reject(`${scriptPath}: extendOnly(name) 无法找到对应指标'${name}'`);
           } else {
             let ruleItems = parseRuleToItems(doc.rule);
+            console.log(ruleItems);
             extendAll(ruleItems).then((exps) => {
               resolve(exps.join(''));
             });
@@ -230,17 +221,48 @@ const extend = (ruleItems) => new Promise((resolve, reject) => {
       let elrule = '';
       let elprefix = '';
       for (let idx = 0; idx < ruleItems.length; idx++) {
+        // skip if rule item is operator or pure number
+        if (OPTS.includes(ruleItems[idx]) || /^\d+$/.test(ruleItems[idx])) continue;
+        // get prefix & real content of rule item. prefix should be '今年累计' '去年累计' '上月' '去年同期' '2018XX'
         let name = dePrefix(ruleItems[idx]);
-        for (let el of docs) {
-          if (el.name === name.realname) {
-            elidx = idx;
-            elrule = el.rule;
-            elprefix = name.prefix;
+        if (name.prefix === '今年累计') {
+          elidx = idx;
+          elprefix = '';
+          let firstMonth = `${moment().format('YYYY')}01`;
+          let yearMonths = [];
+          while(firstMonth !== moment().format('YYYYMM')) {
+            yearMonths.push(`${firstMonth}${name.realname}`);
+            firstMonth = moment(firstMonth, 'YYYYMM').add(1, 'month').format('YYYYMM');
+          }
+          elrule = yearMonths.join('+');
+          break;
+        } else if (name.prefix === '去年累计') {
+          elidx = idx;
+          elprefix = '';
+          let stopMonth = moment().subtract(1, 'year').format('YYYYMM');
+          let firstMonth = `${moment().subtract(1, 'year').format('YYYY')}01`;
+          let yearMonths = [];
+          while(firstMonth !== stopMonth) {
+            yearMonths.push(`${firstMonth}${name.realname}`);
+            firstMonth = moment(firstMonth, 'YYYYMM').add(1, 'month').format('YYYYMM');
+          }
+          elrule = yearMonths.join('+');
+          break;
+        } else {
+          for (let el of docs) {
+            if (el.name === name.realname) {
+              // if indicator rule contains name, continue
+              if (el.rule.indexOf(el.name) < 0) {
+                elidx = idx;
+                elrule = el.rule;
+                elprefix = name.prefix;
+              }
+              break;
+            }
+          }
+          if (elidx >= 0) {
             break;
           }
-        }
-        if (elidx >= 0) {
-          break;
         }
       }
       if (elidx >= 0) {
@@ -289,7 +311,17 @@ const extendAll = (ruleItems) =>
  */
 const dePrefix = (name) => {
   if (typeof name === 'string') {
-    if (name.startsWith('上月')) {
+    if (name.startsWith('今年累计')) {
+      return {
+        prefix: '今年累计',
+        realname: name.slice('今年累计'.length)
+      };
+    } else if (name.startsWith('去年累计')) {
+      return {
+        prefix: '去年累计',
+        realname: name.slice('去年累计'.length)
+      };
+    } else if (name.startsWith('上月')) {
       return {
         prefix: '上月',
         realname: name.slice('上月'.length)
@@ -337,7 +369,7 @@ const parsePrefix = (name, month) => {
       month: lastYear,
       name: deprefixedName.realname
     };
-  } else if (/\d{6}/.test(deprefixedName.prefix)) {
+  } else if (/^\d{6}/.test(deprefixedName.prefix)) {
     return {
       month: deprefixedName.prefix,
       name: deprefixedName.realname
