@@ -98,7 +98,7 @@ module.exports = {
                   let opnd = [];
                   let opndPromise = [];
                   for (let el of ruleItems) {
-                    if (!opnd.includes(el) && !OPTS.includes(el)) {
+                    if (!opnd.includes(el) && !OPTS.includes(el) && !/^\d+$/.test(el)) {
                       opnd.push(el);
                       let calargs = parsePrefix(el, month);
                       opndPromise.push(TablePixel.getPixelValue(calargs.name, calargs.month, rowname));
@@ -111,7 +111,7 @@ module.exports = {
                     }
                     let analyzedItems = [];
                     for (let idx = 0; idx < ruleItems.length; idx++) {
-                      if (OPTS.includes(ruleItems[idx])) {
+                      if (OPTS.includes(ruleItems[idx]) || /^\d+$/.test(ruleItems[idx])) {
                         analyzedItems.push(ruleItems[idx]);
                       } else {
                         analyzedItems.push(opndDict[ruleItems[idx]].val.trim());

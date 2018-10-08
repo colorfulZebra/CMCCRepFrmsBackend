@@ -89,7 +89,11 @@ function analyze(rule) {
       el = rule[++idx];
     }
   }
-  return OPND.pop();
+  if (!OPND.length) {
+    return parseFloat(opndstr.trim());
+  } else {
+    return OPND.pop();
+  }
 }
 
 module.exports = function(rule) {
