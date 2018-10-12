@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
-let router = express.Router();
-let Indicator = require('../controller/indicator');
+const router = express.Router();
+const Indicator = require('../controller/indicator');
 
 router.get('/query', function(req, res) {
   Indicator.allIndicators().then((docs) => {

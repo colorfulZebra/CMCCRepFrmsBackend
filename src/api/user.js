@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
-let router = express.Router();
-let User = require('../controller/user');
+const router = express.Router();
+const User = require('../controller/user');
 
 // 根据用户名取得用户信息
 router.get('/query/:name', function(req, res) {

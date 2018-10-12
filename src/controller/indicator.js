@@ -3,10 +3,10 @@ const scriptPath = 'controller/indicator.js';
 const regMonth = /\d{6}/;
 const OPTS = [ '+', '-', '*', '/', '(', ')' ];
 const moment = require('moment');
-let Indicator = require('../model/indicator');
-let Cache = require('./cache');
-let TablePixel = require('./tablepixel');
-let myRule = require('../tool/myrule');
+const Indicator = require('../model/indicator');
+const Cache = require('./cache');
+const TablePixel = require('./tablepixel');
+const myRule = require('../tool/myrule');
 
 module.exports = {
 

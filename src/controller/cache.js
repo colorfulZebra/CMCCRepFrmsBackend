@@ -1,7 +1,7 @@
 'use strict';
 const scriptPath = 'controller/cache.js';
 const regMonth = /\d{6}/;
-let Cache = require('../model/cache');
+const Cache = require('../model/cache');
 
 module.exports = {
 

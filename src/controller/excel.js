@@ -4,8 +4,8 @@ const scriptPath = 'controller/excel.js';
 const fs = require('fs');
 const XLSX = require('xlsx');
 const regMonthID = /\d{6}/;
-let Excel = require('../model/excel');
-let myExcel = require('../tool/myexcel');
+const Excel = require('../model/excel');
+const myExcel = require('../tool/myexcel');
 
 module.exports = {
   /**

@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
-let router = express.Router();
-let TablePixel = require('../controller/tablepixel');
+const router = express.Router();
+const TablePixel = require('../controller/tablepixel');
 
 router.get('/query', function(req, res) {
   TablePixel.allPixels().then((docs) => {

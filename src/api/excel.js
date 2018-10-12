@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
-let router = express.Router();
-let Excel = require('../controller/excel');
+const router = express.Router();
+const Excel = require('../controller/excel');
 
 router.get('/fuzzy/query', function(req, res) {
   let month = req.query.month;

@@ -1,6 +1,6 @@
 'use strict';
 const md5 = require('md5');
-let User = require('../model/user');
+const User = require('../model/user');
 const scriptPath = 'controller/user.js';
 
 module.exports = {

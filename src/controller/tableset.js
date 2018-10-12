@@ -5,9 +5,9 @@ const config = require('../config');
 const path = require('path');
 const moment = require('moment');
 const randomstr = require('randomstring');
-let TableSet = require('../model/tableset');
-let Pixels = require('./tablepixel');
-let Indicators = require('./indicator');
+const TableSet = require('../model/tableset');
+const Pixels = require('./tablepixel');
+const Indicators = require('./indicator');
 
 module.exports = {
 

@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
-let router = express.Router();
-let TableSet = require('../controller/tableset');
+const router = express.Router();
+const TableSet = require('../controller/tableset');
 
 router.get('/query/:username', function(req, res) {
   TableSet.findTablesByUser(req.params.username).then((doc) => {

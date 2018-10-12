@@ -1,9 +1,9 @@
 'use strict';
 const scriptPath = 'controller/tablepixel.js';
 const regMonth = /\d{6}/;
-let Excel = require('./excel');
-let TablePixel = require('../model/tablepixel');
-let Cache = require('./cache');
+const Excel = require('./excel');
+const TablePixel = require('../model/tablepixel');
+const Cache = require('./cache');
 
 module.exports = {
 

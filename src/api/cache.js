@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
-let router = express.Router();
-let Cache = require('../controller/cache');
+const router = express.Router();
+const Cache = require('../controller/cache');
 
 router.post('/set', function(req, res) {
   let name = req.body.name;
