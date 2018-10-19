@@ -18,9 +18,10 @@ router.get('/query', function(req, res) {
 });
 
 router.post('/new', function(req, res) {
+  let type = req.body.type;
   let name = req.body.name;
   let rule = req.body.rule;
-  Indicator.newIndicator(name, rule).then((doc) => {
+  Indicator.newIndicator(type, name, rule).then((doc) => {
     res.send({
       result: true,
       data: doc
@@ -34,8 +35,9 @@ router.post('/new', function(req, res) {
 });
 
 router.delete('/delete', function(req, res) {
+  let type = req.body.type;
   let name = req.body.name;
-  Indicator.deleteIndicator(name).then((doc) => {
+  Indicator.deleteIndicator(type, name).then((doc) => {
     res.send({
       result: true,
       data: doc

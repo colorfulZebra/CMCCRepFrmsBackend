@@ -12,14 +12,16 @@ module.exports = {
 
   /**
    * Add new indicator
+   * @param {string} type
    * @param {string} name
    * @param {string} rule
    * @return {Promise}
    */
-  newIndicator: function(name, rule) {
+  newIndicator: function(type, name, rule) {
     return new Promise((resolve, reject) => {
-      if (typeof name === 'string' && typeof rule === 'string') {
+      if (typeof type === 'string' && typeof name === 'string' && typeof rule === 'string') {
         new Indicator({
+          type,
           name,
           rule
         }).save((err, doc) => {
@@ -30,7 +32,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: newIndicator(name, rule) 参数非法`);
+        reject(`${scriptPath}: newIndicator(type, name, rule) 参数非法`);
       }
     });
   },
@@ -56,10 +58,10 @@ module.exports = {
    * @param {string} name
    * @return {Promise}
    */
-  deleteIndicator: function(name) {
+  deleteIndicator: function(type, name) {
     return new Promise((resolve, reject) => {
-      if (typeof name === 'string') {
-        Indicator.findOneAndRemove({ name }, (err, res) => {
+      if (typeof type === 'string' && typeof name === 'string') {
+        Indicator.findOneAndRemove({ type, name }, (err, res) => {
           if (err) {
             reject(err);
           } else {
@@ -67,31 +69,32 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: deleteIndicator(name) 参数非法`);
+        reject(`${scriptPath}: deleteIndicator(type, name) 参数非法`);
       }
     });
   },
 
   /**
    * Calculate indicator expression
+   * @param {string} type
    * @param {string} name
    * @param {string} month
    * @param {string} rowname
    */
-  calIndicator: function(name, month, rowname) {
+  calIndicator: function(type, name, month, rowname) {
     return new Promise((resolve, reject) => {
-      if (typeof name === 'string'
+      if (typeof type === 'string' && typeof name === 'string'
       && typeof month === 'string' && regMonth.test(month)
       && typeof rowname === 'string') {
-        Cache.getCache(`indicator_${name}_${rowname}`, month).then((doc) => {
+        Cache.getCache(`indicator_${type}_${name}_${rowname}`, month).then((doc) => {
           if (doc.length === 1 && doc[0] !== undefined) {
             resolve(doc[0].value);
           } else {
-            Indicator.findOne({ name }, (err, doc) => {
+            Indicator.findOne({ type, name }, (err, doc) => {
               if (err) {
                 reject(err);
               } else if (!doc) {
-                reject(`${scriptPath}: calIndicator(name, month, rowname) 无法找到对应指标'${name}'`);
+                reject(`${scriptPath}: calIndicator(type, name, month, rowname) 无法找到对应指标'${name}'`);
               } else {
                 let unextendRuleItems = parseRuleToItems(doc.rule);
                 extendAll(unextendRuleItems).then(ruleItems => {
@@ -128,7 +131,7 @@ module.exports = {
                         col: analyzedItems.length,
                         val: calres.toString()
                       };
-                      Cache.cache(`indicator_${name}_${rowname}`, month, calValue).then(() => {
+                      Cache.cache(`indicator_${type}_${name}_${rowname}`, month, calValue).then(() => {
                         resolve(calValue);
                       }).catch((err) => {
                         reject(err);
@@ -147,7 +150,7 @@ module.exports = {
           }
         });
       } else {
-        reject(`${scriptPath}: calIndicator(name, month, rowname) 参数非法`);
+        reject(`${scriptPath}: calIndicator(type, name, month, rowname) 参数非法`);
       }
     });
   },
@@ -167,7 +170,6 @@ module.exports = {
             reject(`${scriptPath}: extendOnly(name) 无法找到对应指标'${name}'`);
           } else {
             let ruleItems = parseRuleToItems(doc.rule);
-            console.log(ruleItems);
             extendAll(ruleItems).then((exps) => {
               resolve(exps.join(''));
             });
