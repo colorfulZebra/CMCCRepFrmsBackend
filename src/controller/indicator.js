@@ -98,12 +98,13 @@ module.exports = {
               } else {
                 let unextendRuleItems = parseRuleToItems(doc.rule);
                 extendAll(unextendRuleItems).then(ruleItems => {
+                  let parsedItems = parsePrefix(ruleItems, month);
                   let opnd = [];
                   let opndPromise = [];
-                  for (let el of ruleItems) {
+                  for (let el of parsedItems) {
                     if (!opnd.includes(el) && !OPTS.includes(el) && !/^\d+$/.test(el)) {
                       opnd.push(el);
-                      let calargs = parsePrefix(el, month);
+                      let calargs = sepMonthAndName(el);
                       opndPromise.push(TablePixel.getPixelValue(calargs.name, calargs.month, rowname));
                     }
                   }
@@ -113,11 +114,11 @@ module.exports = {
                       opndDict[opnd[idx]] = res[idx];
                     }
                     let analyzedItems = [];
-                    for (let idx = 0; idx < ruleItems.length; idx++) {
-                      if (OPTS.includes(ruleItems[idx]) || /^\d+$/.test(ruleItems[idx])) {
-                        analyzedItems.push(ruleItems[idx]);
+                    for (let idx = 0; idx < parsedItems.length; idx++) {
+                      if (OPTS.includes(parsedItems[idx]) || /^\d+$/.test(parsedItems[idx])) {
+                        analyzedItems.push(parsedItems[idx]);
                       } else {
-                        analyzedItems.push(opndDict[ruleItems[idx]].val.trim());
+                        analyzedItems.push(opndDict[parsedItems[idx]].val.trim());
                       }
                     }
                     let ruleAnalyzed = analyzedItems.join('');
@@ -158,25 +159,26 @@ module.exports = {
   /**
    * Test function to extend rule expression
    * @param {string} name
+   * @param {string} month
    * @return {Promise}
    */
-  extendOnly: function(name) {
+  extendOnly: function(name, month) {
     return new Promise((resolve, reject) => {
-      if (typeof name === 'string') {
+      if (typeof name === 'string' && typeof month === 'string' && /^\d{6}$/.test(month)) {
         Indicator.findOne({ name }, (err, doc) => {
           if (err) {
             reject(err);
           } else if (!doc) {
-            reject(`${scriptPath}: extendOnly(name) 无法找到对应指标'${name}'`);
+            reject(`${scriptPath}: extendOnly(name, month) 无法找到对应指标'${name}'`);
           } else {
             let ruleItems = parseRuleToItems(doc.rule);
             extendAll(ruleItems).then((exps) => {
-              resolve(exps.join(''));
+              resolve(parsePrefix(exps, month).join(''));
             });
           }
         });
       } else {
-        reject(`${scriptPath}: extendOnly(name) 参数非法 `);
+        reject(`${scriptPath}: extendOnly(name, month) 参数非法 `);
       }
     });
   }
@@ -211,7 +213,7 @@ const parseRuleToItems = (rule) => {
 
 /**
  * Get index and extend array of complex indicator
- * @param {Array} ruleItems 
+ * @param {Array<string>} ruleItems 
  * @return {Promise}
  */
 const extend = (ruleItems) => new Promise((resolve, reject) => {
@@ -225,47 +227,19 @@ const extend = (ruleItems) => new Promise((resolve, reject) => {
       for (let idx = 0; idx < ruleItems.length; idx++) {
         // skip if rule item is operator or pure number
         if (OPTS.includes(ruleItems[idx]) || /^\d+$/.test(ruleItems[idx])) continue;
-        // get prefix & real content of rule item. prefix should be '今年累计' '去年累计' '上月' '去年同期' '2018XX'
+        // get prefix & real content of rule item. prefix should be '今年累计' '去年累计' '上月' '去年同期'
         let name = dePrefix(ruleItems[idx]);
-        if (name.prefix === '今年累计') {
-          elidx = idx;
-          elprefix = '';
-          let firstMonth = `${moment().format('YYYY')}01`;
-          let yearMonths = [];
-          while(firstMonth !== moment().format('YYYYMM')) {
-            yearMonths.push(`${firstMonth}${name.realname}`);
-            firstMonth = moment(firstMonth, 'YYYYMM').add(1, 'month').format('YYYYMM');
-          }
-          elrule = yearMonths.join('+');
-          break;
-        } else if (name.prefix === '去年累计') {
-          elidx = idx;
-          elprefix = '';
-          let stopMonth = moment().subtract(1, 'year').format('YYYYMM');
-          let firstMonth = `${moment().subtract(1, 'year').format('YYYY')}01`;
-          let yearMonths = [];
-          while(firstMonth !== stopMonth) {
-            yearMonths.push(`${firstMonth}${name.realname}`);
-            firstMonth = moment(firstMonth, 'YYYYMM').add(1, 'month').format('YYYYMM');
-          }
-          elrule = yearMonths.join('+');
-          break;
-        } else {
-          for (let el of docs) {
-            if (el.name === name.realname) {
-              // if indicator rule contains name, continue
-              if (el.rule.indexOf(el.name) < 0) {
-                elidx = idx;
-                elrule = el.rule;
-                elprefix = name.prefix;
-              }
-              break;
+        for (let el of docs) {
+          if (el.name === name.realname) {
+            // if indicator rule contains name, continue
+            if (el.rule.indexOf(el.name) < 0) {
+              elidx = idx;
+              elrule = el.rule;
+              elprefix = name.prefix;
             }
-          }
-          if (elidx >= 0) {
             break;
           }
-        }
+        } // End of scan rules in mongo
       }
       if (elidx >= 0) {
         let elruleItems = parseRuleToItems(elrule);
@@ -287,7 +261,7 @@ const extend = (ruleItems) => new Promise((resolve, reject) => {
           args: []
         });
       }
-    }
+    } // End of iter of rule items
   });
 });
 
@@ -333,11 +307,6 @@ const dePrefix = (name) => {
         prefix: '去年同期',
         realname: name.slice('去年同期'.length)
       };
-    } else if (/^\d{6}/.test(name)) {
-      return {
-        prefix: name.slice(0, 6),
-        realname: name.slice(6)
-      };
     } else {
       return {
         prefix: '',
@@ -354,32 +323,70 @@ const dePrefix = (name) => {
 
 /**
  * Parse indicator name with month
- * @param {string} name 
+ * @param {Array<string>} ruleItems 
  * @param {string} month 
  */
-const parsePrefix = (name, month) => {
+const parsePrefix = (ruleItems, month) => {
+  // prefix for '上月'
   let lastMonth = moment(month, 'YYYYMM').subtract(1, 'month').format('YYYYMM');
+  // prefix for '去年同期'
   let lastYear = moment(month, 'YYYYMM').subtract(1, 'year').format('YYYYMM');
-  let deprefixedName = dePrefix(name);
-  if (deprefixedName.prefix === '上月') {
-    return {
-      month: lastMonth,
-      name: deprefixedName.realname
-    };
-  } else if (deprefixedName.prefix === '去年同期') {
-    return {
-      month: lastYear,
-      name: deprefixedName.realname
-    };
-  } else if (/^\d{6}/.test(deprefixedName.prefix)) {
-    return {
-      month: deprefixedName.prefix,
-      name: deprefixedName.realname
-    };
-  } else {
-    return {
-      month,
-      name
-    };
+  // prefix for '去年累计'
+  let lastYearMonths = [];
+  let tmpLast = `${moment(lastYear, 'YYYYMM').format('YYYY')}01`;
+  lastYearMonths.push(tmpLast);
+  while (tmpLast !== lastYear) {
+    tmpLast = moment(tmpLast, 'YYYYMM').add(1, 'month').format('YYYYMM');
+    lastYearMonths.push(tmpLast);
   }
+  // prefix for '今年累计'
+  let theYearMonths = [];
+  let tmpThis = `${moment(month, 'YYYYMM').format('YYYY')}01`;
+  theYearMonths.push(tmpThis);
+  while (tmpThis !== month) {
+    tmpThis = moment(tmpThis, 'YYYYMM').add(1, 'month').format('YYYYMM');
+    theYearMonths.push(tmpThis);
+  }
+
+  let resultArr = [];
+  for (let idx = 0; idx < ruleItems.length; idx++) {
+    if (OPTS.includes(ruleItems[idx]) || /^\d+$/.test(ruleItems[idx])) {
+      resultArr.push(ruleItems[idx]);
+      continue;
+    }
+    let deprefixedName = dePrefix(ruleItems[idx]);
+    if (deprefixedName.prefix === '上月') {
+      resultArr.push(`${lastMonth}${deprefixedName.realname}`);
+    } else if (deprefixedName.prefix === '去年同期') {
+      resultArr.push(`${lastYear}${deprefixedName.realname}`);
+    } else if (deprefixedName.prefix === '今年累计') {
+      let replaceItems = [];
+      for (let el of theYearMonths) {
+        replaceItems.push(`${el}${deprefixedName.realname}`);
+        replaceItems.push('+');
+      }
+      replaceItems[replaceItems.length-1] = ')';
+      replaceItems.unshift('(');
+      resultArr = resultArr.concat(replaceItems);
+    } else if (deprefixedName.prefix === '去年累计') {
+      let replaceItems = [];
+      for (let el of lastYearMonths) {
+        replaceItems.push(`${el}${deprefixedName.realname}`);
+        replaceItems.push('+');
+      }
+      replaceItems[replaceItems.length-1] = ')';
+      replaceItems.unshift('(');
+      resultArr = resultArr.concat(replaceItems);
+    } else {
+      resultArr.push(`${month}${deprefixedName.realname}`);
+    }
+  }
+  return resultArr;
+};
+
+const sepMonthAndName = (idname) => {
+  return {
+    name: idname.slice(6),
+    month: idname.slice(0, 6)
+  };
 };

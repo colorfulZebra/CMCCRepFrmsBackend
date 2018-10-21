@@ -162,7 +162,7 @@ module.exports = {
       && typeof sheet === 'string'
       && typeof keywords === 'string') {
         this.fuzzyQueryExcel(month, excel, sheet).then((doc) => {
-          if (!doc.content) {
+          if (!doc || !doc.content) {
             reject(`${scriptPath}: cell(month, excel, sheet, keywords) 找不到记录${month}/${excel}/${sheet}`);
           } else {
             myExcel(doc.content, keywords).then((data) => {

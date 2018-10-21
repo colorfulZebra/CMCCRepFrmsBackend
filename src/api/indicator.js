@@ -51,10 +51,11 @@ router.delete('/delete', function(req, res) {
 });
 
 router.get('/calculate', function(req, res) {
+  let type = req.query.type;
   let name = req.query.name;
   let month = req.query.month;
   let rowname = req.query.rowname;
-  Indicator.calIndicator(name, month, rowname).then((doc) => {
+  Indicator.calIndicator(type, name, month, rowname).then((doc) => {
     res.send({
       data: doc,
       result: true
@@ -69,7 +70,8 @@ router.get('/calculate', function(req, res) {
 
 router.get('/extend', function(req, res) {
   let name = req.query.name;
-  Indicator.extendOnly(name).then((data) => {
+  let month = req.query.month;
+  Indicator.extendOnly(name, month).then((data) => {
     res.send({
       data,
       result: true
