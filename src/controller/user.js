@@ -68,5 +68,31 @@ module.exports = {
         reject(`${scriptPath}: checkIn(userInfo) 用户名或密码非法`);
       }
     });
+  },
+
+  changePWD: function(account, password, newpassword) {
+    return new Promise((resolve, reject) => {
+      if (typeof account === 'string' && account.length > 0 &&
+          typeof password === 'string' && password.length > 0 &&
+          typeof newpassword === 'string' && newpassword.length > 0) {
+        User.findOne({ name: account, password: md5(password) }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else if (!doc) {
+            reject(`${scriptPath}: changePWD(account, password, newpassword) 用户名或密码错误`);
+          } else {
+            User.findOneAndUpdate({ name: account }, { $set: { password: md5(newpassword) } }, (err, res) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(res);
+              }
+            });
+          }
+        });
+      } else {
+        reject(`${scriptPath}: changePWD(account, newpassword) 用户名或密码非法`);
+      }
+    });
   }
 };

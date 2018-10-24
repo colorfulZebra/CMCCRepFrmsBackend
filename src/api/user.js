@@ -34,6 +34,24 @@ router.post('/login', function(req, res) {
   });
 });
 
+router.post('/change', function(req, res) {
+  let name = req.body.name;
+  let password = req.body.password;
+  let newpassword = req.body.newpassword;
+  User.changePWD(name, password, newpassword).then((resp) => {
+    res.send({
+      result: true,
+      data: resp
+    });
+  }).catch((err) => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 // 根据POST内容新增用户
 router.post('/new', function(req, res) {
   let newUser = { name: req.body.name, password: req.body.password };
