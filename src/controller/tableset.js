@@ -301,8 +301,8 @@ module.exports = {
         let wb = XLSX.utils.book_new();
         let ws = XLSX.utils.json_to_sheet(data, { skipHeader: true });
         XLSX.utils.book_append_sheet(wb, ws, sheetname);
-        let filename = `${config.downloadDir}${path.sep}${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
-        XLSX.writeFile(wb, filename);
+        let filename = `${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
+        XLSX.writeFile(wb, `${config.downloadDir}${path.sep}${filename}`);
         resolve(filename);
       } else {
         reject(`${scriptPath}: genXLSX(username, sheetname, data) 参数非法`);
@@ -329,8 +329,8 @@ module.exports = {
             XLSX.utils.book_append_sheet(wb, ws, td.setname);
           }
         }
-        let filename = `${config.downloadDir}${path.sep}${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
-        XLSX.writeFile(wb, filename);
+        let filename = `${username}_${moment().format('YYYYMMDDHHmmss')}_${randomstr.generate(4)}.xlsx`;
+        XLSX.writeFile(wb, `${config.downloadDir}${path.sep}${filename}`);
         resolve(filename);
       } else {
         reject(`${scriptPath}: genXLSXs(username, tabledocs) 参数非法`);

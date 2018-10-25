@@ -13,6 +13,7 @@ router.get('/fuzzy/query', function(req, res) {
       data: doc
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err

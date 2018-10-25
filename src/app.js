@@ -14,6 +14,7 @@ app.get('/', function (req, res) {
   res.send('Hello world');
 });
 
+app.use('/download', express.static('download'));
 app.use('/api/user', require('./api/user'));
 app.use('/api/excel', require('./api/excel'));
 app.use('/api/repfrm', require('./api/tableset'));

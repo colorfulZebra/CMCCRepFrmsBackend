@@ -157,6 +157,7 @@ router.get('/table/download', function(req, res) {
       data: file
     });
   }).catch(err => {
+    console.log(err);
     res.send({
       result: false,
       data: err
@@ -175,6 +176,7 @@ router.post('/table/downloadall', function(req, res) {
       data: file
     });
   }).catch(err => {
+    console.log(err);
     res.send({
       result: false,
       data: err

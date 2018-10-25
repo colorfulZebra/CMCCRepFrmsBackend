@@ -10,6 +10,7 @@ router.get('/query', function(req, res) {
       data: docs
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err
@@ -27,6 +28,7 @@ router.post('/new', function(req, res) {
       data: doc
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err
@@ -43,6 +45,7 @@ router.delete('/delete', function(req, res) {
       data: doc
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       result: false,
       data: err
@@ -61,6 +64,7 @@ router.get('/calculate', function(req, res) {
       result: true
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       data: err,
       result: false
@@ -77,6 +81,7 @@ router.get('/extend', function(req, res) {
       result: true
     });
   }).catch((err) => {
+    console.log(err);
     res.send({
       data: err,
       result: false
