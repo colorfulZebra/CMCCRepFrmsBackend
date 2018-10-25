@@ -11,6 +11,7 @@ let tablesetSchema = new Schema({
       columns: [{
         label: String,
         name: String,
+        ctype: String,
         month: String
       }],
       rows: [ String ],

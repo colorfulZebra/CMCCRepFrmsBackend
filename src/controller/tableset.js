@@ -6,7 +6,6 @@ const path = require('path');
 const moment = require('moment');
 const randomstr = require('randomstring');
 const TableSet = require('../model/tableset');
-const Pixels = require('./tablepixel');
 const Indicators = require('./indicator');
 
 module.exports = {
@@ -209,25 +208,16 @@ module.exports = {
               if (t.name === tablename) table = t;
             });
             if (table !== undefined) {
-              Promise.all([Pixels.allPixels(), Indicators.allIndicators()]).then(docs => {
-                let pixels = docs[0];
-                let indicators = docs[1];
+              Indicators.allIndicators().then(indicators => {
                 let tablePromise = [];
                 table.rows.map(row => {
                   table.columns.map(col => {
                     let flag = false;
-                    // Check if column in pixels, add promise
-                    pixels.map(pix => {
-                      if (pix.name === col.name) {
-                        flag = true;
-                        tablePromise.push(Pixels.getPixelValue(col.name, col.month, row));
-                      }
-                    });
                     // Check if column in indicators, add promise
                     indicators.map(ind => {
                       if (ind.name === col.name) {
                         flag = true;
-                        tablePromise.push(Indicators.calIndicator(col.name, col.month, row));
+                        tablePromise.push(Indicators.calIndicator(col.ctype, col.name, col.month, row));
                       }
                     });
                     // Else throw exception
