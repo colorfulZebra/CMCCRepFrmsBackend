@@ -74,6 +74,24 @@ router.put('/set/rename', function(req, res) {
 
 
 /***************************** REST api for tables ***************************/
+router.get('/table/query', function(req, res) {
+  let username = req.query.owner;
+  let setname = req.query.set;
+  let tablename = req.query.table;
+  TableSet.findTableByUser(username, setname, tablename).then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch((err) => {
+    console.log(err);
+    res.send({
+      result: false,
+      data:err
+    });
+  });
+});
+
 router.put('/table/new', function(req, res) {
   let username = req.body.owner;
   let setname = req.body.name;

@@ -32,6 +32,34 @@ module.exports = {
   },
 
   /**
+   * Find the table defination by table name
+   * @param {string} username 
+   * @param {string} setname 
+   * @param {string} tablename 
+   */
+  findTableByUser: function(username, setname, tablename) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string') {
+        TableSet.findOne({ owner: username, name: setname }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else {
+            let tableDef = {};
+            doc.tables.map(tb => {
+              if (tb.name === tablename) {
+                tableDef = tb;
+              }
+            });
+            resolve(tableDef);
+          }
+        });
+      } else {
+        reject(`${scriptPath}: findTableByUser(username, setname, tablename) 参数非法`);
+      }
+    });
+  },
+
+  /**
    * Create a new table set
    * @param {string} username
    * @param {string} setname
