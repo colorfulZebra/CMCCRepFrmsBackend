@@ -302,10 +302,30 @@ const dePrefix = (name) => {
         prefix: '上月',
         realname: name.slice('上月'.length)
       };
+    } else if (name.startsWith('上上月')) {
+      return {
+        prefix: '上上月',
+        realname: name.slice('上上月'.length)
+      };
     } else if (name.startsWith('去年同期')) {
       return {
         prefix: '去年同期',
         realname: name.slice('去年同期'.length)
+      };
+    } else if (name.startsWith('去年上月')) {
+      return {
+        prefix: '去年上月',
+        realname: name.slice('去年上月'.length)
+      };
+    } else if (name.startsWith('去年上上月')) {
+      return {
+        prefix: '去年上上月',
+        realname: name.slice('去年上上月'.length)
+      };
+    } else if (name.startsWith('去年年底')) {
+      return {
+        prefix: '去年年底',
+        realname: name.slice('去年年底'.length)
       };
     } else {
       return {
@@ -329,8 +349,16 @@ const dePrefix = (name) => {
 const parsePrefix = (ruleItems, month) => {
   // prefix for '上月'
   let lastMonth = moment(month, 'YYYYMM').subtract(1, 'month').format('YYYYMM');
+  // prefix for '上上月'
+  let theMonthBeforeLastMonth = moment(month, 'YYYYMM').subtract(2, 'month').format('YYYYMM');
   // prefix for '去年同期'
   let lastYear = moment(month, 'YYYYMM').subtract(1, 'year').format('YYYYMM');
+  // prefix for '去年上月'
+  let lastYearTheMonthBefore = moment(month, 'YYYYMM').subtract(1, 'year').subtract(1, 'month').format('YYYYMM');
+  // prefix for '去年上上月'
+  let lastYearTheMonthBeforeTheMonth = moment(month, 'YYYYMM').subtract(1, 'year').subtract(2, 'month').format('YYYYMM');
+  // prefix for '去年年底'
+  let lastYearLastMonth = moment(month.slice(0,4)+'01', 'YYYYMM').subtract(1, 'month').format('YYYYMM');
   // prefix for '去年累计'
   let lastYearMonths = [];
   let tmpLast = `${moment(lastYear, 'YYYYMM').format('YYYY')}01`;
@@ -357,8 +385,16 @@ const parsePrefix = (ruleItems, month) => {
     let deprefixedName = dePrefix(ruleItems[idx]);
     if (deprefixedName.prefix === '上月') {
       resultArr.push(`${lastMonth}${deprefixedName.realname}`);
+    } else if (deprefixedName.prefix === '上上月') {
+      resultArr.push(`${theMonthBeforeLastMonth}${deprefixedName.realname}`);
     } else if (deprefixedName.prefix === '去年同期') {
       resultArr.push(`${lastYear}${deprefixedName.realname}`);
+    } else if (deprefixedName.prefix === '去年上月') {
+      resultArr.push(`${lastYearTheMonthBefore}${deprefixedName.realname}`);
+    } else if (deprefixedName.prefix === '去年上上月') {
+      resultArr.push(`${lastYearTheMonthBeforeTheMonth}${deprefixedName.realname}`);
+    } else if (deprefixedName.prefix === '去年年底') {
+      resultArr.push(`${lastYearLastMonth}${deprefixedName.realname}`);
     } else if (deprefixedName.prefix === '今年累计') {
       let replaceItems = [];
       for (let el of theYearMonths) {
