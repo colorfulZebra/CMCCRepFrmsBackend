@@ -223,8 +223,9 @@ module.exports = {
    * @param {string} username
    * @param {string} setname
    * @param {string} tablename
+   * @param {boolean} transpose
    */
-  genTable: function(username, setname, tablename) {
+  genTable: function(username, setname, tablename, transpose=false) {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string') {
         TableSet.findOne({ owner: username, name: setname }, (err, setdoc) => {
@@ -250,7 +251,7 @@ module.exports = {
                     });
                     // Else throw exception
                     if (!flag) {
-                      reject(`${scriptPath}: genTable(username, setname, tablename) 无法找到指标或者Excel元素'${col.name}'`);
+                      reject(`${scriptPath}: genTable(username, setname, tablename, transpose) 无法找到指标或者Excel元素'${col.name}'`);
                     }
                   });
                 });
@@ -273,6 +274,17 @@ module.exports = {
                     }
                     rowitems.push(parseFloat(parseFloat(el.val.replace(/,(?=[\d,]*\.\d{2}\b)/g,'')).toFixed(4)));
                   });
+                  if (transpose) {
+                    let transposedData = [];
+                    for (let i = 0; i < data[0].length; i++) {
+                      let tmprow = [];
+                      for (let j = 0; j < data.length; j++) {
+                        tmprow[j] = data[j][i];
+                      }
+                      transposedData.push(tmprow);
+                    }
+                    data = transposedData;
+                  }
                   resolve({
                     setname,
                     table: tablename,
@@ -286,12 +298,12 @@ module.exports = {
                 reject(err);
               });
             } else {
-              reject(`${scriptPath}: genTable(username, setname, tablename) 找不到记录'${setname}/${tablename}'`);
+              reject(`${scriptPath}: genTable(username, setname, tablename, transpose) 找不到记录'${setname}/${tablename}'`);
             }
           }
         });
       } else {
-        reject(`${scriptPath}: genTable(username, setname, tablename) 参数非法`);
+        reject(`${scriptPath}: genTable(username, setname, tablename, transpose) 参数非法`);
       }
     });
   },
@@ -305,7 +317,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       if (typeof username === 'string' && Array.isArray(tablelist)) {
         let tablePromises = tablelist.map(tb => {
-          return this.genTable(username, tb.set, tb.name);
+          return this.genTable(username, tb.set, tb.name, tb.transpose);
         });
         Promise.all(tablePromises).then(tabledocs => {
           resolve(tabledocs);

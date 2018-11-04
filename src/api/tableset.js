@@ -132,7 +132,8 @@ router.get('/table/gen', function(req, res) {
   let username = req.query.owner;
   let setname = req.query.name;
   let tablename = req.query.table;
-  TableSet.genTable(username, setname, tablename).then((doc) => {
+  let transpose = req.query.transpose === 'true' ? true : false;
+  TableSet.genTable(username, setname, tablename, transpose).then((doc) => {
     res.send({
       result: true,
       data: doc
@@ -167,7 +168,8 @@ router.get('/table/download', function(req, res) {
   let username = req.query.owner;
   let setname = req.query.name;
   let tablename = req.query.table;
-  TableSet.genTable(username, setname, tablename).then(doc => {
+  let transpose = req.query.transpose === 'true' ? true : false;
+  TableSet.genTable(username, setname, tablename, transpose).then(doc => {
     return TableSet.genXLSX(username, doc.setname, doc.data);
   }).then(file => {
     res.send({
