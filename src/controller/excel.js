@@ -6,6 +6,7 @@ const XLSX = require('xlsx');
 const regMonthID = /\d{6}/;
 const Excel = require('../model/excel');
 const myExcel = require('../tool/myexcel');
+const moment = require('moment');
 
 module.exports = {
   /**
@@ -134,6 +135,9 @@ module.exports = {
       && typeof sheetFuz === 'string') {
         let regExcel = new RegExp(excelFuz);
         let regSheet = new RegExp(sheetFuz);
+        if (sheetFuz === 'month') {
+          regSheet = moment(month, 'YYYYMM').format('YYYYMM');
+        }
         Excel.findOne({ month, excel: regExcel, sheet: regSheet }, (err, doc) => {
           if (err) {
             reject(err);

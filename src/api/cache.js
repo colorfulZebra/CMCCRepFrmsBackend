@@ -38,4 +38,19 @@ router.get('/get', function(req, res) {
   });
 });
 
+router.get('/clean', function(req, res) {
+  Cache.cleanAll().then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch((err) => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 module.exports = router;

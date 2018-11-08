@@ -59,6 +59,21 @@ module.exports = {
         reject(`${scriptPath}: getCache(name, month) 参数非法`);
       }
     });
+  },
+
+  /**
+   * Clean all caches
+   */
+  cleanAll: function() {
+    return new Promise((resolve, reject) => {
+      Cache.deleteMany({}, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve([]);
+        }
+      });
+    });
   }
 
 };

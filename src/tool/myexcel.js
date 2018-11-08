@@ -142,7 +142,9 @@ function clusterEucDist (nodeCluster) {
     */
     return nodeCluster.reduce((tt, el, idx) => {
       let taillst = nodeCluster.slice(idx + 1);
-      if (taillst.length === 2) {         // 倒数第三关键字应该是列头的父标题，因此列号小于等于倒数第二关键字列号
+      if (taillst.length > 2 && taillst[0].col < el.col) {
+        tt += LARGE_WEIGHT;
+      } else if (taillst.length === 2) {         // 倒数第三关键字应该是列头的父标题，因此列号小于等于倒数第二关键字列号
         let colkeyidx = taillst[0];
         let rowkeyidx = taillst[1];
         if (colkeyidx.col < el.col) {
