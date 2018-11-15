@@ -138,12 +138,22 @@ module.exports = {
         if (sheetFuz === 'month') {
           regSheet = moment(month, 'YYYYMM').format('YYYYMM');
         }
-        Excel.findOne({ month, excel: regExcel, sheet: regSheet }, (err, doc) => {
-          if (err) {
-            reject(err);
-          } else {
+        Excel.findOne({ month, excel: excelFuz, sheet: sheetFuz }).exec().then((doc) => {
+          if (doc) {
             resolve(doc);
+          } else {
+            return Excel.findOne({ month, excel: regExcel, sheet: sheetFuz }).exec();
           }
+        }).then((doc) => {
+          if (doc) {
+            resolve(doc);
+          } else {
+            return Excel.findOne({ month, excel: regExcel, sheet: regSheet }).exec();
+          }
+        }).then((doc) => {
+          resolve(doc);
+        }).catch((err) => {
+          reject(err);
         });
       } else {
         reject(`${scriptPath}: getExcel(month, excelFuz, sheetFuz) 参数非法`);
