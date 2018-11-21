@@ -15,7 +15,7 @@ function indexKeywords (sheetJson, keywords) {
   for (let row = 0; row < sheetJson.length; row++) {
     for (let i = 0; i < keywords.length; i++) {
       let tmpidx = sheetJson[row].reduce((ar, el, idx) => {
-        if (el === keywords[i]) {
+        if (typeof el === 'string' && el.trim() === keywords[i]) {
           ar.push({row, col:idx});
         }
         return ar;
@@ -178,7 +178,7 @@ function clusterEucDist (nodeCluster) {
  * @param {string} keywords 
  */
 module.exports = function (sheetJson, keywords) {
-  let seekKeywords = keywords.split(' ');
+  let seekKeywords = keywords.split(' ').map(kw => kw.replace(/@/g, ' '));
   return new Promise ((resolve, reject) => {
     try {
       let keyindexes = indexKeywords(sheetJson, seekKeywords);
