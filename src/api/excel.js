@@ -3,6 +3,21 @@ const express = require('express');
 const router = express.Router();
 const Excel = require('../controller/excel');
 
+router.get('/query', function(req, res) {
+  Excel.queryAllExcels().then(docs => {
+    res.send({
+      result:true,
+      data: docs
+    });
+  }).catch(err => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 router.get('/fuzzy/query', function(req, res) {
   let month = req.query.month;
   let excel = req.query.excel;

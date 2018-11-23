@@ -9,6 +9,17 @@ const myExcel = require('../tool/myexcel');
 const moment = require('moment');
 
 module.exports = {
+  queryAllExcels: function() {
+    return new Promise((resolve, reject) => {
+      Excel.find({}, 'month excel sheet', (err, docs) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(docs);
+        }
+      });
+    });
+  },
   /**
    * Record excel content in db
    * @param {string} excelPath
