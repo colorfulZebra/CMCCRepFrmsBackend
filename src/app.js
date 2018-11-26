@@ -34,7 +34,7 @@ app.use('/api/indicator', require('./api/indicator'));
 app.use('/api/cache', require('./api/cache'));
 app.use('/api/rowtype', require('./api/row'));
 
-// app.use(express.static('dist'));
+app.use(express.static('dist'));
 let server = app.listen(config.port, function () {
 
   let serverPort = server.address().port;
