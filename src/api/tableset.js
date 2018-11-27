@@ -223,4 +223,22 @@ router.put('/table/rename', function(req, res) {
   });
 });
 
+router.put('/table/sync', function(req, res) {
+  let username = req.body.owner;
+  let setname = req.body.name;
+  let tablename = req.body.table;
+  TableSet.syncTable(username, setname, tablename).then((doc) => {
+    res.send({
+      result: true,
+      data: doc
+    });
+  }).catch((err) => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 module.exports = router;

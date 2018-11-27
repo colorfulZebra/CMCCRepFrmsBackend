@@ -414,6 +414,77 @@ module.exports = {
         reject(`${scriptPath}: renameTable(username, setname, tablename, newname) 参数非法`);
       }
     });
-  }
+  },
 
+  /**
+   * 
+   * @param {string} username 
+   * @param {string} setname 
+   * @param {string} tablename 
+   */
+  syncTable: function(username, setname, tablename) {
+    return new Promise((resolve, reject) => {
+      if (typeof username === 'string' && typeof setname === 'string' && typeof tablename === 'string') {
+        TableSet.findOne({ owner: username, name: setname }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else if (doc) {
+            let flag = false;
+            let tabledef = [];
+            doc.tables.map(tb => {
+              if (tb.name === tablename) {
+                flag = true;
+                tabledef = tb.columns;
+              }
+            });
+            if (flag) {
+              let parsedef = [];
+              tabledef.map(c => {
+                let eflag = false;
+                parsedef.map(ec => {
+                  if (ec.ctype === c.ctype && ec.name === c.name) {
+                    eflag = true;
+                  }
+                });
+                if (!eflag) {
+                  parsedef.push({ ctype:c.ctype, name:c.name });
+                }
+              });
+              let firstmonth = moment().subtract(1, 'month').format('YYYY01');
+              let lastmonth = moment().format('YYYYMM');
+              let newmonths = [];
+              while (firstmonth !== lastmonth) {
+                newmonths.push(firstmonth);
+                firstmonth = moment(firstmonth, 'YYYYMM').add(1, 'month').format('YYYYMM');
+              }
+              let parseddef =  [];
+              newmonths.map(mel => {
+                parsedef.map(cel => {
+                  parseddef.push({
+                    ctype: cel.ctype,
+                    name: cel.name,
+                    month: mel,
+                    label: `${moment(mel, 'YYYYMM').format('YYYY年MM月')}${cel.name}`
+                  });
+                });
+              });
+              TableSet.findOneAndUpdate({ 'owner': username, 'name': setname, 'tables.name': tablename }, { $set: { 'tables.$.columns': parseddef } }, (err, doc) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(doc);
+                }
+              });
+            } else {
+              reject(`${scriptPath}: syncTable(username, setname, tablename) 表'${setname}/${tablename}@${username}'不存在`);
+            }
+          } else {
+            reject(`${scriptPath}: syncTable(username, setname, tablename) 表集合'${setname}@${username}'不存在`);
+          }
+        });
+      } else {
+        reject(`${scriptPath}: syncTable(username, setname, tablename) 参数非法`);
+      }
+    });
+  }
 };
