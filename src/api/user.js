@@ -52,6 +52,22 @@ router.post('/change', function(req, res) {
   });
 });
 
+router.post('/author', function(req, res) {
+  let name = req.body.name;
+  User.authorise(name).then(resp => {
+    res.send({
+      result: true,
+      data: resp
+    });
+  }).catch(err => {
+    console.log(err);
+    res.send({
+      result: false,
+      data: err
+    });
+  });
+});
+
 // 根据POST内容新增用户
 router.post('/new', function(req, res) {
   let newUser = { name: req.body.name, password: req.body.password };

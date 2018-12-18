@@ -1,5 +1,6 @@
 'use strict';
 const md5 = require('md5');
+const moment = require('moment');
 const User = require('../model/user');
 const scriptPath = 'controller/user.js';
 
@@ -14,7 +15,8 @@ module.exports = {
       if (newUser.name && newUser.password && typeof newUser.name === 'string' && typeof newUser.password === 'string') {
         new User({
           name: newUser.name,
-          password: md5(newUser.password)
+          password: md5(newUser.password),
+          expire: moment().add(3,'month').format()
         }).save((err, doc) => {
           if (err) {
             reject(err);
@@ -61,7 +63,12 @@ module.exports = {
           if (err) {
             reject(err);
           } else {
-            resolve(res);
+            let nowd = moment();
+            if (nowd.isBefore(moment(res.expire))) {
+              resolve(res);
+            } else {
+              reject('用户授权过期，请联系管理员重新授权');
+            }
           }
         });
       } else {
@@ -92,6 +99,31 @@ module.exports = {
         });
       } else {
         reject(`${scriptPath}: changePWD(account, newpassword) 用户名或密码非法`);
+      }
+    });
+  },
+
+  authorise: function(account) {
+    return new Promise((resolve, reject) => {
+      if (typeof account === 'string' && account.length > 0) {
+        User.findOne({ name: account }, (err, doc) => {
+          if (err) {
+            reject(err);
+          } else {
+            let expiredate = moment(doc.expire);
+            User.findOneAndUpdate({ name: account }, { $set: {
+              expire: expiredate.add(3,'month').format()
+            }}, (err, doc) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(doc);
+              }
+            });
+          }
+        });
+      } else {
+        reject(`${scriptPath}: authorise(account) 参数非法`);
       }
     });
   }

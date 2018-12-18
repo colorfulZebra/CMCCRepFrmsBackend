@@ -4,7 +4,8 @@ let Schema = mongoose.Schema;
 
 let userSchema = new Schema({
   name: String,
-  password: String
+  password: String,
+  expire: Date
 });
 userSchema.index({ 'name': 1 }, { unique: true });
 
