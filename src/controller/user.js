@@ -62,6 +62,8 @@ module.exports = {
         User.findOne({ name: userInfo.name, password: md5(userInfo.password) }, (err, res) => {
           if (err) {
             reject(err);
+          } else if (!res) {
+            resolve(res);
           } else {
             let nowd = moment();
             if (nowd.isBefore(moment(res.expire))) {
