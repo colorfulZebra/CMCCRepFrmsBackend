@@ -34,6 +34,7 @@ app.use('/api/indicator', require('./api/indicator'));
 app.use('/api/cache', require('./api/cache'));
 app.use('/api/rowtype', require('./api/row'));
 
+// to debug with 8080 server disable line below
 app.use(express.static('dist'));
 let server = app.listen(config.port, function () {
 
